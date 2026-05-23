@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/localization/app_localizations.dart';
+import '../../../../core/widgets/app_network_image.dart';
 import '../../../auth/data/storage_service.dart';
 import '../../../scan/presentation/screens/camera_realtime_scan_screen.dart';
 import '../../domain/models/shop_product.dart';
@@ -568,8 +569,8 @@ class _ProductCard extends StatelessWidget {
                   borderRadius: const BorderRadius.vertical(
                     top: Radius.circular(24),
                   ),
-                  child: Image.network(
-                    product.primaryImage.imageUrl,
+                  child: AppNetworkImage(
+                    imageUrl: product.primaryImage.imageUrl,
                     width: double.infinity,
                     fit: BoxFit.cover,
                   ),

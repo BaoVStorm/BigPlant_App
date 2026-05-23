@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/localization/app_localizations.dart';
+import '../../../../core/widgets/app_network_image.dart';
 import '../../domain/models/shop_product.dart';
 import '../../domain/shop_service.dart';
 
@@ -240,8 +241,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
               borderRadius: BorderRadius.circular(24),
               child: AspectRatio(
                 aspectRatio: 1,
-                child: Image.network(
-                  _selectedImage.imageUrl,
+                child: AppNetworkImage(
+                  imageUrl: _selectedImage.imageUrl,
                   fit: BoxFit.cover,
                 ),
               ),
@@ -272,7 +273,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     ),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(14),
-                      child: Image.network(image.imageUrl, fit: BoxFit.cover),
+                      child: AppNetworkImage(
+                        imageUrl: image.imageUrl,
+                        fit: BoxFit.cover,
+                      ),
                     ),
                   ),
                 );

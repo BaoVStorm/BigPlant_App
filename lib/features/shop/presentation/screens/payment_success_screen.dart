@@ -103,7 +103,7 @@ class PaymentSuccessScreen extends StatelessWidget {
                             width: 20,
                             height: 20,
                             decoration: const BoxDecoration(
-                              color: AppColors.tertiaryFixedDim,
+                              color: AppColors.tertiary,
                               shape: BoxShape.circle,
                             ),
                           ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/localization/app_localizations.dart';
+import '../../../../core/widgets/app_network_image.dart';
 import '../../domain/models/cart_checkout.dart';
 import 'payment_success_screen.dart';
 
@@ -275,8 +276,8 @@ class _OrderItemRow extends StatelessWidget {
       children: [
         ClipRRect(
           borderRadius: BorderRadius.circular(16),
-          child: Image.network(
-            item.product.primaryImage.imageUrl,
+          child: AppNetworkImage(
+            imageUrl: item.product.primaryImage.imageUrl,
             width: 80,
             height: 80,
             fit: BoxFit.cover,

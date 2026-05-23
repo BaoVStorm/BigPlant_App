@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/localization/app_localizations.dart';
+import '../../../../core/widgets/app_network_image.dart';
 import '../../domain/models/chat_message.dart';
 
 class AiChatDayDivider extends StatelessWidget {
@@ -269,7 +270,11 @@ class AiImageMessageBubble extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
             child: AspectRatio(
               aspectRatio: attachment.aspectRatio,
-              child: Image.network(attachment.imageUrl, fit: BoxFit.cover),
+              child: AppNetworkImage(
+                imageUrl: attachment.imageUrl,
+                fit: BoxFit.cover,
+                icon: Icons.image_outlined,
+              ),
             ),
           ),
           if (attachment.caption.trim().isNotEmpty) ...[
@@ -366,7 +371,11 @@ class UserImageMessageBubble extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
             child: AspectRatio(
               aspectRatio: attachment.aspectRatio,
-              child: Image.network(attachment.imageUrl, fit: BoxFit.cover),
+              child: AppNetworkImage(
+                imageUrl: attachment.imageUrl,
+                fit: BoxFit.cover,
+                icon: Icons.image_outlined,
+              ),
             ),
           ),
         ],
@@ -436,7 +445,7 @@ class AiChatBottomNavPreview extends StatelessWidget {
       ),
       child: Row(
         children: [
-          _PreviewNavItem(icon: Icons.potted_plant, label: t.t('home_tab')),
+          _PreviewNavItem(icon: Icons.local_florist, label: t.t('home_tab')),
           _PreviewNavItem(icon: Icons.center_focus_strong, label: t.t('scan_tab')),
           _PreviewNavItem(icon: Icons.shopping_bag, label: t.t('cart_tab')),
           _PreviewNavItem(icon: Icons.settings, label: t.t('settings_tab')),

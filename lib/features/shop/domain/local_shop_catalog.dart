@@ -73,7 +73,7 @@ class LocalShopCatalog {
     if (categorySlug == 'all')
       return products.where((item) => item.isActive).toList();
     return products
-        .where((item) => item.isActive && item.category.slug == categorySlug)
+        .where((item) => item.isActive && item.category?.slug == categorySlug)
         .toList();
   }
 

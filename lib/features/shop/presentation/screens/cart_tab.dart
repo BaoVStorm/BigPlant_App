@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/localization/app_localizations.dart';
+import '../../../../core/widgets/app_network_image.dart';
 import '../../../auth/data/storage_service.dart';
 import '../../domain/local_cart_session.dart';
 import '../../domain/models/cart_checkout.dart';
@@ -72,95 +73,45 @@ class _CartTabState extends State<CartTab> {
     );
   }
 
+  String get _displayName {
+    final trimmed = _fullName.trim();
+    if (trimmed.isNotEmpty) return trimmed;
+    return 'BigPlant';
+  }
+
   @override
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context);
-    return SafeArea(
-      child: ListView(
-        padding: const EdgeInsets.fromLTRB(18, 16, 18, 120),
-        children: [
-          Text(
-            t.t('cart_title'),
-            style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w800),
-          ),
-          const SizedBox(height: 16),
-          const _CartItemTile(
-            name: 'Monstera Planto',
-            variant: '18cm pot',
-            price: 32.0,
-            quantity: 1,
-          ),
-          const _CartItemTile(
-            name: 'Ceramic Pot - Sand',
-            variant: 'Medium',
-            price: 15.0,
-            quantity: 2,
-          ),
-          const SizedBox(height: 18),
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: AppColors.white,
-              borderRadius: BorderRadius.circular(18),
-              border: Border.all(color: AppColors.cardBorder),
-            ),
-            child: Column(
-              children: const [
-                _PriceRow(label: 'Subtotal', value: '\$62.00'),
-                SizedBox(height: 8),
-                _PriceRow(label: 'Delivery', value: '\$4.00'),
-                Divider(height: 24, color: AppColors.cardBorder),
-                _PriceRow(label: 'Total', value: '\$66.00', isTotal: true),
-              ],
-            ),
-            const SizedBox(height: 16),
+    final theme = Theme.of(context);
+
+    return DecoratedBox(
+      decoration: const BoxDecoration(color: AppColors.surface),
+      child: SafeArea(
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(24, 16, 24, 120),
+          children: [
             Text(
               t.t('cart_title'),
-              style: theme.textTheme.titleLarge?.copyWith(color: AppColors.primary),
+              style: theme.textTheme.headlineMedium?.copyWith(
+                color: AppColors.primary,
+                fontSize: 28,
+              ),
             ),
             const SizedBox(height: 8),
             Text(
-              t.t('cart_selected_items').replaceFirst('{count}', '${_items.length}'),
+              t
+                  .t('cart_selected_items')
+                  .replaceFirst('{count}', '${_items.length}')
+                  .replaceFirst('{name}', _displayName),
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: AppColors.onSurfaceVariant,
               ),
             ),
             const SizedBox(height: 24),
             if (_items.isEmpty)
-              Container(
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  color: AppColors.surfaceContainerLowest,
-                  borderRadius: BorderRadius.circular(24),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.primary.withValues(alpha: 0.04),
-                      blurRadius: 20,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  children: [
-                    const Icon(Icons.shopping_bag_outlined, color: AppColors.primary, size: 40),
-                    const SizedBox(height: 12),
-                    Text(
-                      t.t('cart_empty_title'),
-                      style: theme.textTheme.headlineMedium?.copyWith(
-                        color: AppColors.primary,
-                        fontSize: 24,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      t.t('cart_empty_body'),
-                      textAlign: TextAlign.center,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: AppColors.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ),
+              _EmptyCartCard(
+                title: t.t('cart_empty_title'),
+                body: t.t('cart_empty_body'),
               )
             else ...[
               for (var i = 0; i < _items.length; i++) ...[
@@ -170,7 +121,7 @@ class _CartTabState extends State<CartTab> {
                   onIncrease: () => _updateQuantity(i, 1),
                   onDecrease: () => _updateQuantity(i, -1),
                 ),
-                const SizedBox(height: 16),
+                if (i != _items.length - 1) const SizedBox(height: 16),
               ],
               const SizedBox(height: 24),
               Container(
@@ -197,8 +148,19 @@ class _CartTabState extends State<CartTab> {
                       label: t.t('order_shipping_fee_label'),
                       value: _formatCurrency(_breakdown.shippingFee),
                     ),
+                    if (_breakdown.discount > 0) ...[
+                      const SizedBox(height: 12),
+                      _SummaryRow(
+                        label: t.t('order_discount_label'),
+                        value: '-${_formatCurrency(_breakdown.discount)}',
+                        highlight: true,
+                      ),
+                    ],
                     const SizedBox(height: 16),
-                    const Divider(height: 1, color: AppColors.surfaceContainerHigh),
+                    const Divider(
+                      height: 1,
+                      color: AppColors.surfaceContainerHigh,
+                    ),
                     const SizedBox(height: 16),
                     _SummaryRow(
                       label: t.t('order_total_label'),
@@ -238,6 +200,57 @@ class _CartTabState extends State<CartTab> {
   }
 }
 
+class _EmptyCartCard extends StatelessWidget {
+  const _EmptyCartCard({required this.title, required this.body});
+
+  final String title;
+  final String body;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceContainerLowest,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withValues(alpha: 0.04),
+            blurRadius: 20,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          const Icon(
+            Icons.shopping_bag_outlined,
+            color: AppColors.primary,
+            size: 40,
+          ),
+          const SizedBox(height: 12),
+          Text(
+            title,
+            style: theme.textTheme.headlineMedium?.copyWith(
+              color: AppColors.primary,
+              fontSize: 24,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            body,
+            textAlign: TextAlign.center,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: AppColors.onSurfaceVariant,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _CartItemCard extends StatelessWidget {
   const _CartItemCard({
     required this.item,
@@ -254,6 +267,10 @@ class _CartItemCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final variantLabel = item.variant.potStyle.isEmpty
+        ? item.variant.sizeLabel
+        : '${item.variant.sizeLabel}, ${item.variant.potStyle}';
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -268,11 +285,12 @@ class _CartItemCard extends StatelessWidget {
         ],
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(12),
-            child: Image.network(
-              item.product.primaryImage.imageUrl,
+            child: AppNetworkImage(
+              imageUrl: item.product.primaryImage.imageUrl,
               width: 96,
               height: 96,
               fit: BoxFit.cover,
@@ -283,69 +301,55 @@ class _CartItemCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(name, style: const TextStyle(fontWeight: FontWeight.w700)),
-                const SizedBox(height: 2),
                 Text(
-                  variant,
-                  style: const TextStyle(color: AppColors.darkGrey),
+                  item.product.name,
+                  style: theme.textTheme.labelLarge?.copyWith(
+                    color: AppColors.onSurface,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
-              ],
-            ),
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                '\$${price.toStringAsFixed(2)}',
-                style: const TextStyle(
-                  fontWeight: FontWeight.w800,
-                  color: AppColors.leafGreenDark,
+                const SizedBox(height: 4),
+                Text(
+                  variantLabel,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: AppColors.onSurfaceVariant,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 8),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 5,
-                ),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: AppColors.cardBorder),
+                const SizedBox(height: 12),
+                if (item.variant.compareAtPrice != null)
+                  Text(
+                    priceFormatter(item.variant.compareAtPrice!),
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: AppColors.onSurfaceVariant,
+                      decoration: TextDecoration.lineThrough,
+                    ),
+                  ),
+                Text(
+                  priceFormatter(item.variant.price),
+                  style: theme.textTheme.headlineMedium?.copyWith(
+                    color: AppColors.primary,
+                    fontSize: 18,
+                  ),
                 ),
                 const SizedBox(height: 12),
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          if (item.variant.compareAtPrice != null)
-                            Text(
-                              priceFormatter(item.variant.compareAtPrice!),
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: AppColors.onSurfaceVariant,
-                                decoration: TextDecoration.lineThrough,
-                              ),
-                            ),
-                          Text(
-                            priceFormatter(item.variant.price),
-                            style: theme.textTheme.headlineMedium?.copyWith(
-                              color: AppColors.primary,
-                              fontSize: 18,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
                         color: AppColors.surfaceContainerLow,
                         borderRadius: BorderRadius.circular(999),
                       ),
                       child: Row(
                         children: [
-                          _QuantityButton(icon: Icons.remove, onTap: onDecrease),
+                          _QuantityButton(
+                            icon: Icons.remove,
+                            onTap: onDecrease,
+                          ),
                           SizedBox(
                             width: 22,
                             child: Text(
@@ -358,6 +362,13 @@ class _CartItemCard extends StatelessWidget {
                           ),
                           _QuantityButton(icon: Icons.add, onTap: onIncrease),
                         ],
+                      ),
+                    ),
+                    Text(
+                      priceFormatter(item.lineSubtotal),
+                      style: theme.textTheme.labelLarge?.copyWith(
+                        color: AppColors.blackLight,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
                   ],
@@ -394,11 +405,13 @@ class _SummaryRow extends StatelessWidget {
   const _SummaryRow({
     required this.label,
     required this.value,
+    this.highlight = false,
     this.total = false,
   });
 
   final String label;
   final String value;
+  final bool highlight;
   final bool total;
 
   @override
@@ -409,7 +422,9 @@ class _SummaryRow extends StatelessWidget {
             fontSize: 20,
           )
         : Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: AppColors.onSurfaceVariant,
+            color: highlight
+                ? AppColors.secondary
+                : AppColors.onSurfaceVariant,
           );
     final valueStyle = total
         ? Theme.of(context).textTheme.headlineMedium?.copyWith(
@@ -417,14 +432,13 @@ class _SummaryRow extends StatelessWidget {
             fontSize: 24,
           )
         : Theme.of(context).textTheme.labelLarge?.copyWith(
-            color: AppColors.onSurface,
+            color: highlight ? AppColors.secondary : AppColors.onSurface,
+            fontWeight: highlight ? FontWeight.w700 : FontWeight.w500,
           );
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(label, style: style),
-        Text(value, style: style),
-      ],
+      children: [Text(label, style: labelStyle), Text(value, style: valueStyle)],
     );
   }
 }

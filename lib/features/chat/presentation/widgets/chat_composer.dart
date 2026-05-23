@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/widgets/app_network_image.dart';
 import '../../domain/models/chat_message.dart';
 
 class AiChatComposer extends StatelessWidget {
@@ -48,7 +49,11 @@ class AiChatComposer extends StatelessWidget {
                       aspectRatio: draftAttachment!.aspectRatio,
                       child: SizedBox(
                         width: 64,
-                        child: Image.network(draftAttachment!.imageUrl, fit: BoxFit.cover),
+                        child: AppNetworkImage(
+                          imageUrl: draftAttachment!.imageUrl,
+                          fit: BoxFit.cover,
+                          icon: Icons.image_outlined,
+                        ),
                       ),
                     ),
                   ),
