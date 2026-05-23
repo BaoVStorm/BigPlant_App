@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/localization/app_localizations.dart';
+import '../../../chat/presentation/screens/ai_chat_tab.dart';
 import 'cart_tab.dart';
 import 'home_tab.dart';
 import 'scan_tab.dart';
@@ -22,7 +23,7 @@ class _MainShellScreenState extends State<MainShellScreen> {
   @override
   void initState() {
     super.initState();
-    _currentIndex = widget.initialIndex.clamp(0, 3) as int;
+    _currentIndex = widget.initialIndex.clamp(0, 4);
   }
 
   @override
@@ -32,6 +33,7 @@ class _MainShellScreenState extends State<MainShellScreen> {
       const HomeTab(),
       const ScanTab(),
       const CartTab(),
+      const AiChatTab(showBottomNavPreview: false),
       const SettingsTab(),
     ];
 
@@ -39,6 +41,7 @@ class _MainShellScreenState extends State<MainShellScreen> {
       _NavItemData(icon: Icons.local_florist, label: t.t('home_tab')),
       _NavItemData(icon: Icons.center_focus_strong, label: t.t('scan_tab')),
       _NavItemData(icon: Icons.shopping_bag_rounded, label: t.t('cart_tab')),
+      const _NavItemData(icon: Icons.smart_toy_rounded, label: 'AI'),
       _NavItemData(icon: Icons.settings_rounded, label: t.t('settings_tab')),
     ];
 
