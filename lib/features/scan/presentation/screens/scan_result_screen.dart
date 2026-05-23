@@ -863,7 +863,7 @@ class _HeroChip extends StatelessWidget {
               style: Theme.of(context).textTheme.labelLarge?.copyWith(
                 color: AppColors.white,
                 fontSize: 13,
-                height: 1.05,
+                height: 1.2,
               ),
             ),
           ),

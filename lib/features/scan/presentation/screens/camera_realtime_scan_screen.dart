@@ -877,7 +877,7 @@ class _ModelSelectorPill extends StatelessWidget {
                   textAlign: TextAlign.left,
                   style: Theme.of(context).textTheme.labelLarge?.copyWith(
                     color: AppColors.primary,
-                    height: 1.05,
+                    height: 1.2,
                   ),
                 ),
               ),
