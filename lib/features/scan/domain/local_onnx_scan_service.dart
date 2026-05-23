@@ -175,6 +175,7 @@ class LocalOnnxScanService {
     final best = topPredictions.first;
     return LocalInferenceResult(
       modelId: selectedId,
+      modelDisplayName: model.entry.displayName,
       classIndex: best.classIndex,
       label: best.label,
       confidence: best.confidence,
@@ -218,7 +219,12 @@ class LocalOnnxScanService {
     final session = OrtSession.fromBuffer(modelBuffer, sessionOptions);
     sessionOptions.release();
 
-    final loaded = _LoadedModel(config: config, labels: labels, session: session);
+    final loaded = _LoadedModel(
+      entry: entry,
+      config: config,
+      labels: labels,
+      session: session,
+    );
     _loadedModels[modelId] = loaded;
     return loaded;
   }
@@ -301,6 +307,7 @@ class LocalOnnxScanService {
 class LocalInferenceResult {
   const LocalInferenceResult({
     required this.modelId,
+    required this.modelDisplayName,
     required this.classIndex,
     required this.label,
     required this.confidence,
@@ -308,6 +315,7 @@ class LocalInferenceResult {
   });
 
   final String modelId;
+  final String modelDisplayName;
   final int classIndex;
   final String label;
   final double confidence;
@@ -328,11 +336,13 @@ class LocalTopPrediction {
 
 class _LoadedModel {
   const _LoadedModel({
+    required this.entry,
     required this.config,
     required this.labels,
     required this.session,
   });
 
+  final LocalModelEntry entry;
   final LocalModelConfig config;
   final List<String> labels;
   final OrtSession session;

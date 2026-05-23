@@ -407,11 +407,11 @@ class _CameraRealtimeScanScreenState extends State<CameraRealtimeScanScreen> {
       safetyNotes: '',
       evidenceLevel: '',
       confidence: prediction.confidence,
-      modelName: prediction.modelId,
+      modelName: prediction.modelDisplayName,
       backend: 'ONNX Runtime',
       distributionAreas: const [],
       distributionPoints: const [],
-      note: 'Local ONNX model: ${prediction.modelId}\nTop-5:\n$topkText',
+      note: 'Local ONNX model: ${prediction.modelDisplayName}\nTop-5:\n$topkText',
     );
 
     await Navigator.of(context)

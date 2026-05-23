@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -486,19 +485,6 @@ class _ScanResultScreenState extends State<ScanResultScreen> {
     return items;
   }
 
-  String _prettifyLabel(String value) {
-    final raw = value.trim();
-    if (raw.isEmpty) return raw;
-    return raw
-        .split(RegExp(r'[_\s]+'))
-        .map(
-          (part) => part.isEmpty
-              ? part
-              : '${part[0].toUpperCase()}${part.substring(1).toLowerCase()}',
-        )
-        .join(' ');
-  }
-
   Future<void> _openExpandedMap(BuildContext context) async {
     final t = AppLocalizations.of(context);
     final plant = _contentResult;
@@ -808,9 +794,9 @@ class _HeroSection extends StatelessWidget {
                         dark: true,
                       ),
                       _HeroChip(
-                        icon: Icons.psychology,
+                        icon: Icons.tune_rounded,
                         label: (modelLabel != null && modelLabel!.isNotEmpty)
-                            ? modelLabel!
+                            ? _breakModelLabel(modelLabel!)
                             : 'Standard Model',
                         dark: true,
                       ),
@@ -831,6 +817,13 @@ class _HeroSection extends StatelessWidget {
       ),
     );
   }
+}
+
+String _breakModelLabel(String value) {
+  final text = value.trim();
+  final firstSpace = text.indexOf(' ');
+  if (firstSpace <= 0) return text;
+  return '${text.substring(0, firstSpace)}\n${text.substring(firstSpace + 1)}';
 }
 
 class _HeroChip extends StatelessWidget {
@@ -862,11 +855,16 @@ class _HeroChip extends StatelessWidget {
         children: [
           Icon(icon, color: AppColors.white, size: 18),
           const SizedBox(width: 8),
-          Text(
-            label,
-            style: Theme.of(context).textTheme.labelLarge?.copyWith(
-              color: AppColors.white,
-              fontSize: 13,
+          Flexible(
+            child: Text(
+              label,
+              maxLines: 2,
+              softWrap: true,
+              style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                color: AppColors.white,
+                fontSize: 13,
+                height: 1.05,
+              ),
             ),
           ),
         ],
