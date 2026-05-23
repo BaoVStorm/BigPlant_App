@@ -8,14 +8,22 @@ import 'scan_tab.dart';
 import 'settings_tab.dart';
 
 class MainShellScreen extends StatefulWidget {
-  const MainShellScreen({super.key});
+  const MainShellScreen({this.initialIndex = 0, super.key});
+
+  final int initialIndex;
 
   @override
   State<MainShellScreen> createState() => _MainShellScreenState();
 }
 
 class _MainShellScreenState extends State<MainShellScreen> {
-  int _currentIndex = 0;
+  late int _currentIndex;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentIndex = widget.initialIndex.clamp(0, 3) as int;
+  }
 
   @override
   Widget build(BuildContext context) {

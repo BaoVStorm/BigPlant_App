@@ -73,6 +73,21 @@
   - `product_variants`
   - `product_images`
   - linked plant snapshot qua `plant_id`
+- Cart/checkout UI da duoc mo rong theo Stitch flow moi:
+  - `Cart Tab`
+  - `Order Summary Tab`
+  - `Payment Success Tab`
+- Hien tai flow checkout van la local UI flow:
+  - cart state local
+  - order summary local
+  - payment success local
+  - chua co payment gateway hay order-history API thuc te
+- AI Chat UI da duoc tach thanh feature rieng trong `lib/features/chat`:
+  - screen chat mock theo kieu load tu db
+  - bubble user/AI tach rieng
+  - bubble text va bubble image tach rieng
+  - composer co draft attachment preview
+- Hien tai AI Chat chua duoc wire vao `MainShellScreen` hay route chinh theo yeu cau.
 - `flutter analyze` va `flutter test` pass sau khi them ONNX + camera.
 - APK debug rat lon do bundle nhieu ONNX files (~600MB), can quan tri release strategy.
 - ONNX realtime da chot yeu cau tensor float32; neu dua tensor double se fail voi loi `Unexpected input data type`.
