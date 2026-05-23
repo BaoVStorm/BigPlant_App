@@ -105,6 +105,7 @@ class AiChatComposer extends StatelessWidget {
                   child: TextField(
                     controller: controller,
                     focusNode: focusNode,
+                    onTapOutside: (_) => focusNode.unfocus(),
                     minLines: 1,
                     maxLines: 5,
                     textInputAction: TextInputAction.newline,

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/localization/app_localizations.dart';
-import '../../../auth/data/storage_service.dart';
 import '../../../auth/domain/auth_service.dart';
 
 class EditUserScreen extends StatefulWidget {
@@ -349,6 +348,7 @@ class _EditUserScreenState extends State<EditUserScreen> {
                   icon: Icons.badge,
                   child: TextField(
                     controller: _fullNameCtrl,
+                    onTapOutside: (_) => FocusScope.of(context).unfocus(),
                     style: theme.textTheme.bodyMedium?.copyWith(
                       fontSize: (theme.textTheme.bodyMedium?.fontSize ?? 14) - 2,
                     ),
@@ -362,6 +362,7 @@ class _EditUserScreenState extends State<EditUserScreen> {
                   icon: Icons.phone_iphone,
                   child: TextField(
                     controller: _phoneCtrl,
+                    onTapOutside: (_) => FocusScope.of(context).unfocus(),
                     keyboardType: TextInputType.phone,
                     style: theme.textTheme.bodyMedium?.copyWith(
                       fontSize: (theme.textTheme.bodyMedium?.fontSize ?? 14) - 2,

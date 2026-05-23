@@ -553,6 +553,7 @@ class _AuthOtpInputState extends State<AuthOtpInput> {
           child: TextField(
             controller: _digitControllers[index],
             focusNode: _focusNodes[index],
+            onTapOutside: (_) => FocusScope.of(context).unfocus(),
             keyboardType: TextInputType.number,
             textInputAction:
                 index == 3 ? TextInputAction.done : TextInputAction.next,

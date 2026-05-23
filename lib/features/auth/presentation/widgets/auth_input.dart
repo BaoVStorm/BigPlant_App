@@ -67,6 +67,7 @@ class _AuthInputState extends State<AuthInput> {
         ],
         TextField(
           controller: widget.controller,
+          onTapOutside: (_) => FocusScope.of(context).unfocus(),
           keyboardType: widget.keyboardType,
           obscureText: _obscured,
           style: theme.textTheme.bodyMedium?.copyWith(

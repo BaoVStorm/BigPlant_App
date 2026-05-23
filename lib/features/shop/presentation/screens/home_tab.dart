@@ -295,6 +295,7 @@ class _HomeTabState extends State<HomeTab> {
                     ),
                     child: TextField(
                       controller: _searchController,
+                      onTapOutside: (_) => FocusScope.of(context).unfocus(),
                       onChanged: _handleSearchChanged,
                       onSubmitted: (value) {
                         _searchDebounceTimer?.cancel();

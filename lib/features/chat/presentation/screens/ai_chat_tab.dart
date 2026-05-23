@@ -150,53 +150,64 @@ class _AiChatTabState extends State<AiChatTab> {
     return '${hour.toString().padLeft(2, '0')}:$minute $meridiem';
   }
 
+  void _dismissKeyboard() {
+    final currentFocus = FocusScope.of(context);
+    if (!currentFocus.hasPrimaryFocus && currentFocus.focusedChild != null) {
+      currentFocus.unfocus();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.backgroundTop,
-      body: Column(
-        children: [
-          _ChatHeader(onBack: _handleBack, onMore: _handleMore),
-          Expanded(
-            child: _loading
-                ? const Center(
-                    child: CircularProgressIndicator(color: AppColors.primary),
-                  )
-                : ListView.builder(
-                    controller: _scrollController,
-                    padding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
-                    itemCount: _messages.length + 1,
-                    itemBuilder: (context, index) {
-                      if (index == 0) {
-                        return const Padding(
-                          padding: EdgeInsets.only(bottom: 24),
-                          child: AiChatDayDivider(label: 'Today'),
+      body: GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        onTap: _dismissKeyboard,
+        child: Column(
+          children: [
+            _ChatHeader(onBack: _handleBack, onMore: _handleMore),
+            Expanded(
+              child: _loading
+                  ? const Center(
+                      child: CircularProgressIndicator(color: AppColors.primary),
+                    )
+                  : ListView.builder(
+                      controller: _scrollController,
+                      padding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
+                      itemCount: _messages.length + 1,
+                      itemBuilder: (context, index) {
+                        if (index == 0) {
+                          return const Padding(
+                            padding: EdgeInsets.only(bottom: 24),
+                            child: AiChatDayDivider(label: 'Today'),
+                          );
+                        }
+                        final message = _messages[index - 1];
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 18),
+                          child: _ChatMessageBlock(
+                            message: message,
+                            timestamp: _formatTimestamp(message.sentAt),
+                            onQuickReplyTap: _sendQuickReply,
+                          ),
                         );
-                      }
-                      final message = _messages[index - 1];
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 18),
-                        child: _ChatMessageBlock(
-                          message: message,
-                          timestamp: _formatTimestamp(message.sentAt),
-                          onQuickReplyTap: _sendQuickReply,
-                        ),
-                      );
-                    },
-                  ),
-          ),
-          AiChatComposer(
-            controller: _composerController,
-            focusNode: _composerFocusNode,
-            placeholder: 'Nhắn tin cho BigPlant AI...',
-            draftAttachment: _draftAttachment,
-            onToggleAttachment: _toggleDraftAttachment,
-            onRemoveAttachment: _removeDraftAttachment,
-            onSend: _sendCurrentDraft,
-            replying: _replying,
-          ),
-          if (widget.showBottomNavPreview) const AiChatBottomNavPreview(),
-        ],
+                      },
+                    ),
+            ),
+            AiChatComposer(
+              controller: _composerController,
+              focusNode: _composerFocusNode,
+              placeholder: 'Nhắn tin cho BigPlant AI...',
+              draftAttachment: _draftAttachment,
+              onToggleAttachment: _toggleDraftAttachment,
+              onRemoveAttachment: _removeDraftAttachment,
+              onSend: _sendCurrentDraft,
+              replying: _replying,
+            ),
+            if (widget.showBottomNavPreview) const AiChatBottomNavPreview(),
+          ],
+        ),
       ),
     );
   }

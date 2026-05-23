@@ -17,6 +17,13 @@ class BigPlantApp extends StatefulWidget {
 class _BigPlantAppState extends State<BigPlantApp> {
   final LocaleController _localeController = LocaleController();
 
+  void _dismissKeyboard(BuildContext context) {
+    final currentFocus = FocusScope.of(context);
+    if (!currentFocus.hasPrimaryFocus && currentFocus.focusedChild != null) {
+      currentFocus.unfocus();
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -30,10 +37,10 @@ class _BigPlantAppState extends State<BigPlantApp> {
       builder: (context, _) {
         return LocaleScope(
           controller: _localeController,
-            child: MaterialApp(
-              navigatorKey: AuthSessionManager.navigatorKey,
-              debugShowCheckedModeBanner: false,
-              title: 'BigPlant',
+          child: MaterialApp(
+            navigatorKey: AuthSessionManager.navigatorKey,
+            debugShowCheckedModeBanner: false,
+            title: 'BigPlant',
             theme: AppTheme.light(),
             locale: _localeController.locale,
             supportedLocales: const [Locale('en'), Locale('vi')],
@@ -45,6 +52,13 @@ class _BigPlantAppState extends State<BigPlantApp> {
             ],
             initialRoute: AppRouter.splash,
             onGenerateRoute: AppRouter.onGenerateRoute,
+            builder: (context, child) {
+              return GestureDetector(
+                behavior: HitTestBehavior.translucent,
+                onTap: () => _dismissKeyboard(context),
+                child: child ?? const SizedBox.shrink(),
+              );
+            },
           ),
         );
       },
