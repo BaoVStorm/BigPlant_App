@@ -536,7 +536,7 @@ class _CameraRealtimeScanScreenState extends State<CameraRealtimeScanScreen> {
                       onTap: _handleClose,
                     ),
                     _ModelSelectorPill(
-                      label: _friendlyModelLabel(_selectedModelId),
+                      label: _multilineFriendlyModelLabel(_selectedModelId),
                       onTap: _showModelPicker,
                     ),
                   ],
@@ -736,25 +736,44 @@ class _CameraRealtimeScanScreenState extends State<CameraRealtimeScanScreen> {
     showModalBottomSheet<void>(
       context: context,
       showDragHandle: true,
+      backgroundColor: AppColors.surfaceContainerLowest,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      ),
       builder: (context) {
         return SafeArea(
-          child: ListView(
-            shrinkWrap: true,
-            children: _modelIds
-                .map(
-                  (id) => ListTile(
-                    title: Text(_friendlyModelLabel(id)),
-                    subtitle: Text(id),
-                    trailing: _selectedModelId == id
-                        ? const Icon(Icons.check_rounded)
-                        : null,
-                    onTap: () {
-                      Navigator.of(context).pop();
-                      _changeModel(id);
-                    },
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 4, 20, 20),
+            child: ListView(
+              shrinkWrap: true,
+              children: [
+                Text(
+                  'Choose model',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w700,
+                    fontSize:
+                        (Theme.of(context).textTheme.titleMedium?.fontSize ?? 18) -
+                        2,
                   ),
-                )
-                .toList(),
+                ),
+                const SizedBox(height: 14),
+                ..._modelIds.map(
+                  (id) => Padding(
+                    padding: const EdgeInsets.only(bottom: 10),
+                    child: _ModelPickerTile(
+                      title: _friendlyModelLabel(id),
+                      subtitle: id,
+                      selected: _selectedModelId == id,
+                      onTap: () {
+                        Navigator.of(context).pop();
+                        _changeModel(id);
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         );
       },
@@ -785,6 +804,13 @@ class _CameraRealtimeScanScreenState extends State<CameraRealtimeScanScreen> {
           return '${part[0].toUpperCase()}${part.substring(1)}';
         })
         .join(' ');
+  }
+
+  String _multilineFriendlyModelLabel(String? modelId) {
+    final label = _friendlyModelLabel(modelId);
+    final firstSpace = label.indexOf(' ');
+    if (firstSpace <= 0) return label;
+    return '${label.substring(0, firstSpace)}\n${label.substring(firstSpace + 1)}';
   }
 
   static String _formatPlantLabel(String raw) {
@@ -839,13 +865,20 @@ class _ModelSelectorPill extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
           child: Row(
             mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               const Icon(Icons.psychology, color: AppColors.primary, size: 18),
               const SizedBox(width: 8),
-              Text(
-                label,
-                style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  color: AppColors.primary,
+              Flexible(
+                child: Text(
+                  label,
+                  maxLines: 2,
+                  softWrap: true,
+                  textAlign: TextAlign.left,
+                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                    color: AppColors.primary,
+                    height: 1.05,
+                  ),
                 ),
               ),
               const SizedBox(width: 4),
@@ -853,6 +886,105 @@ class _ModelSelectorPill extends StatelessWidget {
                 Icons.expand_more,
                 color: AppColors.primary,
                 size: 18,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ModelPickerTile extends StatelessWidget {
+  const _ModelPickerTile({
+    required this.title,
+    required this.subtitle,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final String title;
+  final String subtitle;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Material(
+      color: selected
+          ? AppColors.secondaryContainer.withValues(alpha: 0.55)
+          : AppColors.surface,
+      borderRadius: BorderRadius.circular(20),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(20),
+        child: Ink(
+          padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: selected ? AppColors.primary : AppColors.outlineVariant,
+            ),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 42,
+                height: 42,
+                decoration: BoxDecoration(
+                  color: selected
+                      ? AppColors.primary.withValues(alpha: 0.12)
+                      : AppColors.surfaceContainerLow,
+                  shape: BoxShape.circle,
+                ),
+                alignment: Alignment.center,
+                child: Icon(
+                  Icons.psychology_alt_rounded,
+                  color: selected ? AppColors.primary : AppColors.onSurfaceVariant,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        color: AppColors.onSurface,
+                        fontWeight: FontWeight.w700,
+                        fontSize:
+                            (theme.textTheme.titleMedium?.fontSize ?? 18) - 2,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      subtitle,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: AppColors.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 12),
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 180),
+                width: 24,
+                height: 24,
+                decoration: BoxDecoration(
+                  color: selected ? AppColors.primary : Colors.transparent,
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: selected ? AppColors.primary : AppColors.outlineVariant,
+                  ),
+                ),
+                child: selected
+                    ? const Icon(Icons.check_rounded, size: 16, color: AppColors.white)
+                    : null,
               ),
             ],
           ),
