@@ -3,35 +3,107 @@
   "camera_mode": "onnx_local_realtime",
   "gallery_mode": "backend_api",
   "models": {
-    "organ_aware_switch_vit": {
-      "display_name": "organ_aware_switch_vit",
-      "config_path": "assets/ml/models/organ_aware_switch_vit/config.json",
-      "labels_path": "assets/ml/models/organ_aware_switch_vit/labels.json",
-      "onnx_path": "assets/ml/models/organ_aware_switch_vit/model.onnx",
-      "supports_camera_realtime": true,
-      "num_classes": 100
-    },
-    "efficientnetv2_segformer": {
-      "display_name": "efficientnetv2_segformer",
-      "config_path": "assets/ml/models/efficientnetv2_segformer/config.json",
-      "labels_path": "assets/ml/models/efficientnetv2_segformer/labels.json",
-      "onnx_path": "assets/ml/models/efficientnetv2_segformer/model.onnx",
-      "supports_camera_realtime": true,
-      "num_classes": 100
-    },
-    "efficientnetv2_mask2former": {
-      "display_name": "efficientnetv2_mask2former",
-      "config_path": "assets/ml/models/efficientnetv2_mask2former/config.json",
-      "labels_path": "assets/ml/models/efficientnetv2_mask2former/labels.json",
-      "onnx_path": "assets/ml/models/efficientnetv2_mask2former/model.onnx",
-      "supports_camera_realtime": false,
-      "num_classes": 100
-    },
     "mobilenetv3large_segformer": {
-      "display_name": "mobilenetv3large_segformer",
+      "display_name": "MobileNetV3 Seg (Legacy)",
       "config_path": "assets/ml/models/mobilenetv3large_segformer/config.json",
       "labels_path": "assets/ml/models/mobilenetv3large_segformer/labels.json",
       "onnx_path": "assets/ml/models/mobilenetv3large_segformer/model.onnx",
+      "supports_camera_realtime": true,
+      "num_classes": 100
+    },
+    "mobilenetv3large_deeplabv3_384": {
+      "display_name": "MobileNetV3-Large DeepLabV3 384",
+      "config_path": "assets/ml/models/mobilenetv3large_deeplabv3_384/config.json",
+      "labels_path": "assets/ml/models/mobilenetv3large_deeplabv3_384/labels.json",
+      "onnx_path": "assets/ml/models/mobilenetv3large_deeplabv3_384/model.onnx",
+      "supports_camera_realtime": true,
+      "num_classes": 100
+    },
+    "mobilenetv3large_deeplabv3_512": {
+      "display_name": "MobileNetV3-Large DeepLabV3 512",
+      "config_path": "assets/ml/models/mobilenetv3large_deeplabv3_512/config.json",
+      "labels_path": "assets/ml/models/mobilenetv3large_deeplabv3_512/labels.json",
+      "onnx_path": "assets/ml/models/mobilenetv3large_deeplabv3_512/model.onnx",
+      "supports_camera_realtime": true,
+      "num_classes": 100
+    },
+    "mobilenetv3large_mask2former_384": {
+      "display_name": "MobileNetV3-Large Mask2Former 384",
+      "config_path": "assets/ml/models/mobilenetv3large_mask2former_384/config.json",
+      "labels_path": "assets/ml/models/mobilenetv3large_mask2former_384/labels.json",
+      "onnx_path": "assets/ml/models/mobilenetv3large_mask2former_384/model.onnx",
+      "supports_camera_realtime": true,
+      "num_classes": 100
+    },
+    "mobilenetv3large_mask2former_512": {
+      "display_name": "MobileNetV3-Large Mask2Former 512",
+      "config_path": "assets/ml/models/mobilenetv3large_mask2former_512/config.json",
+      "labels_path": "assets/ml/models/mobilenetv3large_mask2former_512/labels.json",
+      "onnx_path": "assets/ml/models/mobilenetv3large_mask2former_512/model.onnx",
+      "supports_camera_realtime": true,
+      "num_classes": 100
+    },
+    "mobilenetv3large_segformer_b4_384": {
+      "display_name": "MobileNetV3-Large SegFormer B4 384",
+      "config_path": "assets/ml/models/mobilenetv3large_segformer_b4_384/config.json",
+      "labels_path": "assets/ml/models/mobilenetv3large_segformer_b4_384/labels.json",
+      "onnx_path": "assets/ml/models/mobilenetv3large_segformer_b4_384/model.onnx",
+      "supports_camera_realtime": true,
+      "num_classes": 100
+    },
+    "mobilenetv3large_segformer_b4_512": {
+      "display_name": "MobileNetV3-Large SegFormer B4 512",
+      "config_path": "assets/ml/models/mobilenetv3large_segformer_b4_512/config.json",
+      "labels_path": "assets/ml/models/mobilenetv3large_segformer_b4_512/labels.json",
+      "onnx_path": "assets/ml/models/mobilenetv3large_segformer_b4_512/model.onnx",
+      "supports_camera_realtime": true,
+      "num_classes": 100
+    },
+    "resnet50_deeplabv3_384": {
+      "display_name": "ResNet50 DeepLabV3 384",
+      "config_path": "assets/ml/models/resnet50_deeplabv3_384/config.json",
+      "labels_path": "assets/ml/models/resnet50_deeplabv3_384/labels.json",
+      "onnx_path": "assets/ml/models/resnet50_deeplabv3_384/model.onnx",
+      "supports_camera_realtime": true,
+      "num_classes": 100
+    },
+    "resnet50_deeplabv3_512": {
+      "display_name": "ResNet50 DeepLabV3 512",
+      "config_path": "assets/ml/models/resnet50_deeplabv3_512/config.json",
+      "labels_path": "assets/ml/models/resnet50_deeplabv3_512/labels.json",
+      "onnx_path": "assets/ml/models/resnet50_deeplabv3_512/model.onnx",
+      "supports_camera_realtime": true,
+      "num_classes": 100
+    },
+    "resnet50_mask2former_384": {
+      "display_name": "ResNet50 Mask2Former 384",
+      "config_path": "assets/ml/models/resnet50_mask2former_384/config.json",
+      "labels_path": "assets/ml/models/resnet50_mask2former_384/labels.json",
+      "onnx_path": "assets/ml/models/resnet50_mask2former_384/model.onnx",
+      "supports_camera_realtime": true,
+      "num_classes": 100
+    },
+    "resnet50_mask2former_512": {
+      "display_name": "ResNet50 Mask2Former 512",
+      "config_path": "assets/ml/models/resnet50_mask2former_512/config.json",
+      "labels_path": "assets/ml/models/resnet50_mask2former_512/labels.json",
+      "onnx_path": "assets/ml/models/resnet50_mask2former_512/model.onnx",
+      "supports_camera_realtime": true,
+      "num_classes": 100
+    },
+    "resnet50_segformer_384": {
+      "display_name": "ResNet50 SegFormer 384",
+      "config_path": "assets/ml/models/resnet50_segformer_384/config.json",
+      "labels_path": "assets/ml/models/resnet50_segformer_384/labels.json",
+      "onnx_path": "assets/ml/models/resnet50_segformer_384/model.onnx",
+      "supports_camera_realtime": true,
+      "num_classes": 100
+    },
+    "resnet50_segformer_512": {
+      "display_name": "ResNet50 SegFormer 512",
+      "config_path": "assets/ml/models/resnet50_segformer_512/config.json",
+      "labels_path": "assets/ml/models/resnet50_segformer_512/labels.json",
+      "onnx_path": "assets/ml/models/resnet50_segformer_512/model.onnx",
       "supports_camera_realtime": true,
       "num_classes": 100
     }

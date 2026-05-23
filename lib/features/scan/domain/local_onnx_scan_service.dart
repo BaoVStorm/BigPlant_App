@@ -21,7 +21,7 @@ class LocalOnnxScanService {
 
   Future<LocalModelCatalog> loadCatalog() async {
     if (_catalog != null) return _catalog!;
-    final content = await rootBundle.loadString(_catalogAsset);
+    final content = _stripBom(await rootBundle.loadString(_catalogAsset));
     final decoded = jsonDecode(content);
     if (decoded is! Map) {
       throw Exception('Invalid model catalog format');
@@ -192,8 +192,8 @@ class LocalOnnxScanService {
       throw Exception('Missing model entry in catalog: $modelId');
     }
 
-    final configRaw = await rootBundle.loadString(entry.configPath);
-    final labelsRaw = await rootBundle.loadString(entry.labelsPath);
+    final configRaw = _stripBom(await rootBundle.loadString(entry.configPath));
+    final labelsRaw = _stripBom(await rootBundle.loadString(entry.labelsPath));
     final modelBytes = await rootBundle.load(entry.onnxPath);
 
     final configDecoded = jsonDecode(configRaw);
@@ -227,6 +227,13 @@ class LocalOnnxScanService {
     final labels = json['labels'];
     if (labels is! List) return const [];
     return labels.map((item) => item.toString()).toList();
+  }
+
+  String _stripBom(String content) {
+    if (content.startsWith('\uFEFF')) {
+      return content.substring(1);
+    }
+    return content;
   }
 
   Float32List _preprocessImage(img.Image input, LocalModelConfig config) {

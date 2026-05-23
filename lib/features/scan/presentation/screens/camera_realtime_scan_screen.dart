@@ -46,7 +46,6 @@ class _CameraRealtimeScanScreenState extends State<CameraRealtimeScanScreen> {
   DateTime _lastInferAt = DateTime.fromMillisecondsSinceEpoch(0);
   int _consecutiveInferFailures = 0;
   String? _lastInferError;
-  String _lastFrameFormat = '-';
   int _lastInferLatencyMs = 0;
 
   @override
@@ -107,8 +106,6 @@ class _CameraRealtimeScanScreenState extends State<CameraRealtimeScanScreen> {
         _showCaptureReview) {
       return;
     }
-    _lastFrameFormat = cameraImage.format.group.name;
-
     final now = DateTime.now();
     if (now.difference(_lastInferAt).inMilliseconds < 500) return;
 
@@ -695,7 +692,7 @@ class _CameraRealtimeScanScreenState extends State<CameraRealtimeScanScreen> {
                 _CaptureSummaryCard(
                   icon: Icons.timer,
                   label: t.t('scan_latency_label'),
-                  value: '${_lastInferLatencyMs} ms',
+                  value: '$_lastInferLatencyMs ms',
                 ),
                 const SizedBox(height: 16),
                 _CaptureSummaryCard(
@@ -765,18 +762,29 @@ class _CameraRealtimeScanScreenState extends State<CameraRealtimeScanScreen> {
   }
 
   String _friendlyModelLabel(String? modelId) {
-    switch (modelId) {
-      case 'mobilenetv3large_segformer':
-        return 'MobileNetV3 Seg';
-      case 'efficientnetv2_segformer':
-        return 'EfficientNetV2 Seg';
-      case 'efficientnetv2_mask2former':
-        return 'EfficientNetV2 M2F';
-      case 'organ_aware_switch_vit':
-        return 'Organ Aware ViT';
-      default:
-        return modelId ?? 'Botanical-V2';
+    if (modelId == null || modelId.trim().isEmpty) {
+      return 'Botanical-V2';
     }
+
+    const aliases = {
+      'mobilenetv3large': 'MobileNetV3-Large',
+      'resnet50': 'ResNet50',
+      'deeplabv3': 'DeepLabV3',
+      'mask2former': 'Mask2Former',
+      'segformer': 'SegFormer',
+      'b4': 'B4',
+    };
+
+    return modelId
+        .split('_')
+        .where((part) => part.isNotEmpty)
+        .map((part) {
+          final alias = aliases[part.toLowerCase()];
+          if (alias != null) return alias;
+          if (RegExp(r'^\d+$').hasMatch(part)) return part;
+          return '${part[0].toUpperCase()}${part.substring(1)}';
+        })
+        .join(' ');
   }
 
   static String _formatPlantLabel(String raw) {

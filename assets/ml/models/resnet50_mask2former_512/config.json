@@ -1,0 +1,47 @@
+﻿{
+    "model_id":  "resnet50_mask2former_512",
+    "source":  {
+                   "backend_project":  "D:/Homework/BackEnd/ModelDetectApi",
+                   "source_onnx":  "D:/Homework/BackEnd/ModelDetectApi/model/resnet50-mask2former/resnet50-mask2former-512x512.onnx"
+               },
+    "runtime":  {
+                    "format":  "onnx",
+                    "preprocess_mode":  "raw_01",
+                    "image_scale":  "to_float_0_1",
+                    "input_layout":  "NCHW",
+                    "topk_default":  5,
+                    "two_pass_default":  false,
+                    "supports_camera_realtime":  true
+                },
+    "io":  {
+               "inputs":  [
+                              {
+                                  "name":  "image",
+                                  "shape":  [
+                                                "batch",
+                                                3,
+                                                224,
+                                                224
+                                            ],
+                                  "type":  "tensor(float)"
+                              }
+                          ],
+               "outputs":  [
+                               {
+                                   "name":  "logits",
+                                   "shape":  [
+                                                 "batch",
+                                                 100
+                                             ],
+                                   "type":  "tensor(float)"
+                               }
+                           ],
+               "num_classes":  100
+           },
+    "asset":  {
+                  "onnx_path":  "assets/ml/models/resnet50_mask2former_512/model.onnx",
+                  "labels_path":  "assets/ml/models/resnet50_mask2former_512/labels.json",
+                  "onnx_size_bytes":  94769845,
+                  "onnx_sha256":  "0623f686dd08b31806f222c094b35ef9ae0641a8bc1a5c52cf6ae74c1af160ba"
+              }
+}

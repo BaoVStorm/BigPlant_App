@@ -1,0 +1,47 @@
+﻿{
+    "model_id":  "mobilenetv3large_deeplabv3_384",
+    "source":  {
+                   "backend_project":  "D:/Homework/BackEnd/ModelDetectApi",
+                   "source_onnx":  "D:/Homework/BackEnd/ModelDetectApi/model/mobilenetv3large-deeplabv3/mobilenetv3large-deeplabv3-384x384.onnx"
+               },
+    "runtime":  {
+                    "format":  "onnx",
+                    "preprocess_mode":  "imagenet_norm",
+                    "image_scale":  "to_float_0_1_then_normalize",
+                    "input_layout":  "NCHW",
+                    "topk_default":  5,
+                    "two_pass_default":  false,
+                    "supports_camera_realtime":  true
+                },
+    "io":  {
+               "inputs":  [
+                              {
+                                  "name":  "image",
+                                  "shape":  [
+                                                "batch",
+                                                3,
+                                                224,
+                                                224
+                                            ],
+                                  "type":  "tensor(float)"
+                              }
+                          ],
+               "outputs":  [
+                               {
+                                   "name":  "logits",
+                                   "shape":  [
+                                                 "batch",
+                                                 100
+                                             ],
+                                   "type":  "tensor(float)"
+                               }
+                           ],
+               "num_classes":  100
+           },
+    "asset":  {
+                  "onnx_path":  "assets/ml/models/mobilenetv3large_deeplabv3_384/model.onnx",
+                  "labels_path":  "assets/ml/models/mobilenetv3large_deeplabv3_384/labels.json",
+                  "onnx_size_bytes":  17307693,
+                  "onnx_sha256":  "a748e8ce31445932db7952a969ba55e0d4fc3b8c7ab176858f81ece54460ee4e"
+              }
+}

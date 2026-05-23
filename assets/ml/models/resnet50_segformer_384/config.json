@@ -1,0 +1,47 @@
+﻿{
+    "model_id":  "resnet50_segformer_384",
+    "source":  {
+                   "backend_project":  "D:/Homework/BackEnd/ModelDetectApi",
+                   "source_onnx":  "D:/Homework/BackEnd/ModelDetectApi/model/resnet50-segformer/resnet50-segformer-384x384.onnx"
+               },
+    "runtime":  {
+                    "format":  "onnx",
+                    "preprocess_mode":  "imagenet_norm",
+                    "image_scale":  "to_float_0_1_then_normalize",
+                    "input_layout":  "NCHW",
+                    "topk_default":  5,
+                    "two_pass_default":  false,
+                    "supports_camera_realtime":  true
+                },
+    "io":  {
+               "inputs":  [
+                              {
+                                  "name":  "image",
+                                  "shape":  [
+                                                "batch",
+                                                3,
+                                                224,
+                                                224
+                                            ],
+                                  "type":  "tensor(float)"
+                              }
+                          ],
+               "outputs":  [
+                               {
+                                   "name":  "logits",
+                                   "shape":  [
+                                                 "batch",
+                                                 100
+                                             ],
+                                   "type":  "tensor(float)"
+                               }
+                           ],
+               "num_classes":  100
+           },
+    "asset":  {
+                  "onnx_path":  "assets/ml/models/resnet50_segformer_384/model.onnx",
+                  "labels_path":  "assets/ml/models/resnet50_segformer_384/labels.json",
+                  "onnx_size_bytes":  94769845,
+                  "onnx_sha256":  "9a1b3bbdd4f4bf7a511ddb1c61aecf266bc4d7046479853009d9535c51d9aae5"
+              }
+}

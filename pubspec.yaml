@@ -71,20 +71,20 @@ flutter:
 
   assets:
     - assets/branding/bigplant_logo.png
-    - assets/ml/configs/model_catalog.json
-    - assets/ml/configs/runtime_policy.json
-    - assets/ml/models/organ_aware_switch_vit/model.onnx
-    - assets/ml/models/organ_aware_switch_vit/config.json
-    - assets/ml/models/organ_aware_switch_vit/labels.json
-    - assets/ml/models/efficientnetv2_segformer/model.onnx
-    - assets/ml/models/efficientnetv2_segformer/config.json
-    - assets/ml/models/efficientnetv2_segformer/labels.json
-    - assets/ml/models/efficientnetv2_mask2former/model.onnx
-    - assets/ml/models/efficientnetv2_mask2former/config.json
-    - assets/ml/models/efficientnetv2_mask2former/labels.json
-    - assets/ml/models/mobilenetv3large_segformer/model.onnx
-    - assets/ml/models/mobilenetv3large_segformer/config.json
-    - assets/ml/models/mobilenetv3large_segformer/labels.json
+    - assets/ml/configs/
+    - assets/ml/models/mobilenetv3large_segformer/
+    - assets/ml/models/mobilenetv3large_deeplabv3_384/
+    - assets/ml/models/mobilenetv3large_deeplabv3_512/
+    - assets/ml/models/mobilenetv3large_mask2former_384/
+    - assets/ml/models/mobilenetv3large_mask2former_512/
+    - assets/ml/models/mobilenetv3large_segformer_b4_384/
+    - assets/ml/models/mobilenetv3large_segformer_b4_512/
+    - assets/ml/models/resnet50_deeplabv3_384/
+    - assets/ml/models/resnet50_deeplabv3_512/
+    - assets/ml/models/resnet50_mask2former_384/
+    - assets/ml/models/resnet50_mask2former_512/
+    - assets/ml/models/resnet50_segformer_384/
+    - assets/ml/models/resnet50_segformer_512/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
