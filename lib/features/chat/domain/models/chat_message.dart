@@ -7,6 +7,7 @@ class AiChatAttachment {
     required this.id,
     required this.imageUrl,
     required this.altText,
+    this.localFilePath,
     this.aspectRatio = 1,
     this.caption = '',
   });
@@ -14,8 +15,11 @@ class AiChatAttachment {
   final String id;
   final String imageUrl;
   final String altText;
+  final String? localFilePath;
   final double aspectRatio;
   final String caption;
+
+  bool get isLocalFile => (localFilePath?.trim().isNotEmpty ?? false);
 }
 
 class AiChatMessage {

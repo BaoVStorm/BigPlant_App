@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/localization/app_localizations.dart';
-import '../../../../core/widgets/app_network_image.dart';
 import '../../domain/models/chat_message.dart';
+import 'chat_attachment_image.dart';
 
 class AiChatDayDivider extends StatelessWidget {
   const AiChatDayDivider({required this.label, super.key});
@@ -276,10 +276,9 @@ class AiImageMessageBubble extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
             child: AspectRatio(
               aspectRatio: attachment.aspectRatio,
-              child: AppNetworkImage(
-                imageUrl: attachment.imageUrl,
+              child: ChatAttachmentImage(
+                attachment: attachment,
                 fit: BoxFit.cover,
-                icon: Icons.image_outlined,
               ),
             ),
           ),
@@ -381,10 +380,9 @@ class UserImageMessageBubble extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
             child: AspectRatio(
               aspectRatio: attachment.aspectRatio,
-              child: AppNetworkImage(
-                imageUrl: attachment.imageUrl,
+              child: ChatAttachmentImage(
+                attachment: attachment,
                 fit: BoxFit.cover,
-                icon: Icons.image_outlined,
               ),
             ),
           ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/localization/app_localizations.dart';
@@ -23,6 +24,7 @@ class AiChatTab extends StatefulWidget {
 
 class _AiChatTabState extends State<AiChatTab> {
   final MockAiChatRepository _repository = MockAiChatRepository();
+  final ImagePicker _imagePicker = ImagePicker();
   final TextEditingController _composerController = TextEditingController();
   final FocusNode _composerFocusNode = FocusNode();
   final ScrollController _scrollController = ScrollController();
@@ -58,11 +60,25 @@ class _AiChatTabState extends State<AiChatTab> {
     _scrollToBottom(jump: true);
   }
 
-  void _toggleDraftAttachment() {
+  Future<void> _toggleDraftAttachment() async {
+    final picked = await _imagePicker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 92,
+    );
+    if (picked == null || !mounted) return;
+
+    final image = await decodeImageFromList(await picked.readAsBytes());
+    if (!mounted) return;
+
     setState(() {
-      _draftAttachment = _draftAttachment == null
-          ? _repository.buildMockAttachment()
-          : null;
+      _draftAttachment = AiChatAttachment(
+        id: 'draft-${DateTime.now().microsecondsSinceEpoch}',
+        imageUrl: '',
+        localFilePath: picked.path,
+        altText: picked.name,
+        aspectRatio: image.width / image.height,
+        caption: picked.name,
+      );
     });
   }
 

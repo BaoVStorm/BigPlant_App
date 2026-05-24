@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/constants/app_colors.dart';
-import '../../../../core/widgets/app_network_image.dart';
 import '../../domain/models/chat_message.dart';
+import 'chat_attachment_image.dart';
 
 class AiChatComposer extends StatelessWidget {
   const AiChatComposer({
@@ -31,53 +31,6 @@ class AiChatComposer extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        if (draftAttachment != null)
-          Padding(
-            padding: const EdgeInsets.fromLTRB(24, 12, 24, 0),
-            child: Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: AppColors.surfaceContainerLow,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: AppColors.surfaceContainerHighest),
-              ),
-              child: Row(
-                children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: AspectRatio(
-                      aspectRatio: draftAttachment!.aspectRatio,
-                      child: SizedBox(
-                        width: 64,
-                        child: AppNetworkImage(
-                          imageUrl: draftAttachment!.imageUrl,
-                          fit: BoxFit.cover,
-                          icon: Icons.image_outlined,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      draftAttachment!.caption.isEmpty
-                          ? draftAttachment!.altText
-                          : draftAttachment!.caption,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: AppColors.onSurfaceVariant,
-                          ),
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: onRemoveAttachment,
-                    icon: const Icon(Icons.close, color: AppColors.onSurfaceVariant),
-                  ),
-                ],
-              ),
-            ),
-          ),
         Container(
           width: double.infinity,
           padding: const EdgeInsets.all(12),
@@ -103,6 +56,13 @@ class AiChatComposer extends StatelessWidget {
                   icon: const Icon(Icons.add_circle, color: AppColors.onSurfaceVariant),
                   visualDensity: VisualDensity.compact,
                 ),
+                if (draftAttachment != null) ...[
+                  _InlineAttachmentPreview(
+                    attachment: draftAttachment!,
+                    onRemove: onRemoveAttachment,
+                  ),
+                  const SizedBox(width: 8),
+                ],
                 Expanded(
                   child: TextField(
                     controller: controller,
@@ -163,6 +123,60 @@ class AiChatComposer extends StatelessWidget {
                   ),
                 ),
               ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _InlineAttachmentPreview extends StatelessWidget {
+  const _InlineAttachmentPreview({
+    required this.attachment,
+    required this.onRemove,
+  });
+
+  final AiChatAttachment attachment;
+  final VoidCallback onRemove;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        Container(
+          width: 42,
+          height: 42,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: AppColors.surfaceContainerHighest),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(11),
+            child: ChatAttachmentImage(
+              attachment: attachment,
+              fit: BoxFit.cover,
+            ),
+          ),
+        ),
+        Positioned(
+          top: -5,
+          right: -5,
+          child: Material(
+            color: AppColors.surface,
+            shape: const CircleBorder(),
+            child: InkWell(
+              onTap: onRemove,
+              customBorder: const CircleBorder(),
+              child: const Padding(
+                padding: EdgeInsets.all(2),
+                child: Icon(
+                  Icons.close,
+                  size: 14,
+                  color: AppColors.onSurfaceVariant,
+                ),
+              ),
             ),
           ),
         ),
