@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/localization/app_localizations.dart';
 import '../../data/mock_ai_chat_repository.dart';
 import '../../domain/models/chat_message.dart';
 import '../widgets/chat_composer.dart';
@@ -110,20 +111,20 @@ class _AiChatTabState extends State<AiChatTab> {
   }
 
   void _handleBack() {
+    final t = AppLocalizations.of(context);
     if (Navigator.of(context).canPop()) {
       Navigator.of(context).pop();
       return;
     }
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('AI Chat tab is built but not wired into app navigation yet.'),
-      ),
+      SnackBar(content: Text(t.t('ai_chat_nav_pending'))),
     );
   }
 
   void _handleMore() {
+    final t = AppLocalizations.of(context);
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('More actions are not wired yet.')),
+      SnackBar(content: Text(t.t('ai_chat_more_pending'))),
     );
   }
 
@@ -159,6 +160,7 @@ class _AiChatTabState extends State<AiChatTab> {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context);
     return Scaffold(
       backgroundColor: AppColors.backgroundTop,
       body: GestureDetector(
@@ -166,7 +168,12 @@ class _AiChatTabState extends State<AiChatTab> {
         onTap: _dismissKeyboard,
         child: Column(
           children: [
-            _ChatHeader(onBack: _handleBack, onMore: _handleMore),
+            _ChatHeader(
+              onBack: _handleBack,
+              onMore: _handleMore,
+              title: t.t('ai_chat_title'),
+              status: t.t('ai_chat_status_online'),
+            ),
             Expanded(
               child: _loading
                   ? const Center(
@@ -178,9 +185,9 @@ class _AiChatTabState extends State<AiChatTab> {
                       itemCount: _messages.length + 1,
                       itemBuilder: (context, index) {
                         if (index == 0) {
-                          return const Padding(
+                          return Padding(
                             padding: EdgeInsets.only(bottom: 24),
-                            child: AiChatDayDivider(label: 'Today'),
+                            child: AiChatDayDivider(label: t.t('ai_chat_day_today')),
                           );
                         }
                         final message = _messages[index - 1];
@@ -198,7 +205,7 @@ class _AiChatTabState extends State<AiChatTab> {
             AiChatComposer(
               controller: _composerController,
               focusNode: _composerFocusNode,
-              placeholder: 'Nhắn tin cho BigPlant AI...',
+              placeholder: t.t('ai_chat_placeholder'),
               draftAttachment: _draftAttachment,
               onToggleAttachment: _toggleDraftAttachment,
               onRemoveAttachment: _removeDraftAttachment,
@@ -214,10 +221,17 @@ class _AiChatTabState extends State<AiChatTab> {
 }
 
 class _ChatHeader extends StatelessWidget {
-  const _ChatHeader({required this.onBack, required this.onMore});
+  const _ChatHeader({
+    required this.onBack,
+    required this.onMore,
+    required this.title,
+    required this.status,
+  });
 
   final VoidCallback onBack;
   final VoidCallback onMore;
+  final String title;
+  final String status;
 
   @override
   Widget build(BuildContext context) {
@@ -272,14 +286,14 @@ class _ChatHeader extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'BigPlant AI',
+                    title,
                     style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                           color: AppColors.primary,
                           fontSize: 24,
                         ),
                   ),
                   Text(
-                    'Online',
+                    status,
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
                           color: AppColors.outline,
                         ),

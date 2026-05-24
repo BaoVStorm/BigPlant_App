@@ -114,12 +114,16 @@ class AiChatComposer extends StatelessWidget {
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: AppColors.onSurface,
                       height: 1.35,
+                      fontSize:
+                          (Theme.of(context).textTheme.bodyMedium?.fontSize ?? 14) - 2,
                     ),
                     decoration: InputDecoration(
                       hintText: placeholder,
                       hintStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: AppColors.onSurfaceVariant,
                         height: 1.35,
+                        fontSize:
+                            (Theme.of(context).textTheme.bodyMedium?.fontSize ?? 14) - 2,
                       ),
                       border: InputBorder.none,
                       isCollapsed: true,

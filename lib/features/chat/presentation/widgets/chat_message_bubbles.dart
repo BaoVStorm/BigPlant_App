@@ -92,6 +92,7 @@ class AiTextMessageBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final fontSize = (Theme.of(context).textTheme.bodyMedium?.fontSize ?? 14) - 2;
     return Container(
       constraints: const BoxConstraints(maxWidth: 320),
       padding: const EdgeInsets.all(16),
@@ -117,6 +118,7 @@ class AiTextMessageBubble extends StatelessWidget {
         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: AppColors.onSurface,
               height: 1.55,
+              fontSize: fontSize,
             ),
       ),
     );
@@ -130,6 +132,7 @@ class AiInsightMessageBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final fontSize = (Theme.of(context).textTheme.bodyMedium?.fontSize ?? 14) - 2;
     return Container(
       constraints: const BoxConstraints(maxWidth: 340),
       padding: const EdgeInsets.all(16),
@@ -151,6 +154,7 @@ class AiInsightMessageBubble extends StatelessWidget {
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: AppColors.onSurfaceVariant,
                   height: 1.55,
+                  fontSize: fontSize,
                 ),
           ),
           if (message.insightTitle != null && message.insightTitle!.trim().isNotEmpty) ...[
@@ -239,6 +243,7 @@ class AiImageMessageBubble extends StatelessWidget {
     if (attachment == null) {
       return AiTextMessageBubble(message: message);
     }
+    final fontSize = (Theme.of(context).textTheme.bodyMedium?.fontSize ?? 14) - 2;
 
     return Container(
       constraints: const BoxConstraints(maxWidth: 320),
@@ -262,6 +267,7 @@ class AiImageMessageBubble extends StatelessWidget {
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: AppColors.onSurface,
                     height: 1.5,
+                    fontSize: fontSize,
                   ),
             ),
             const SizedBox(height: 12),
@@ -300,6 +306,7 @@ class UserTextMessageBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final fontSize = (Theme.of(context).textTheme.bodyMedium?.fontSize ?? 14) - 2;
     return Container(
       constraints: const BoxConstraints(maxWidth: 320),
       padding: const EdgeInsets.all(16),
@@ -324,6 +331,7 @@ class UserTextMessageBubble extends StatelessWidget {
         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: AppColors.white,
               height: 1.55,
+              fontSize: fontSize,
             ),
       ),
     );
@@ -341,6 +349,7 @@ class UserImageMessageBubble extends StatelessWidget {
     if (attachment == null) {
       return UserTextMessageBubble(message: message);
     }
+    final fontSize = (Theme.of(context).textTheme.bodyMedium?.fontSize ?? 14) - 2;
 
     return Container(
       constraints: const BoxConstraints(maxWidth: 320),
@@ -363,6 +372,7 @@ class UserImageMessageBubble extends StatelessWidget {
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: AppColors.white,
                     height: 1.55,
+                    fontSize: fontSize,
                   ),
             ),
             const SizedBox(height: 12),
