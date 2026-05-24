@@ -48,79 +48,87 @@ class AiChatComposer extends StatelessWidget {
               borderRadius: BorderRadius.circular(22),
               border: Border.all(color: AppColors.surfaceContainerHighest),
             ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                IconButton(
-                  onPressed: replying ? null : onToggleAttachment,
-                  icon: const Icon(Icons.add_circle, color: AppColors.onSurfaceVariant),
-                  visualDensity: VisualDensity.compact,
-                ),
                 if (draftAttachment != null) ...[
-                  _InlineAttachmentPreview(
-                    attachment: draftAttachment!,
-                    onRemove: onRemoveAttachment,
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(6, 2, 6, 10),
+                    child: _InlineAttachmentPreview(
+                      attachment: draftAttachment!,
+                      onRemove: onRemoveAttachment,
+                    ),
                   ),
-                  const SizedBox(width: 8),
                 ],
-                Expanded(
-                  child: TextField(
-                    controller: controller,
-                    focusNode: focusNode,
-                    onTapOutside: (_) => focusNode.unfocus(),
-                    minLines: 1,
-                    maxLines: 5,
-                    textInputAction: TextInputAction.newline,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: AppColors.onSurface,
-                      height: 1.35,
-                      fontSize:
-                          (Theme.of(context).textTheme.bodyMedium?.fontSize ?? 14) - 2,
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    IconButton(
+                      onPressed: replying ? null : onToggleAttachment,
+                      icon: const Icon(Icons.add_circle, color: AppColors.onSurfaceVariant),
+                      visualDensity: VisualDensity.compact,
                     ),
-                    decoration: InputDecoration(
-                      hintText: placeholder,
-                      hintStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: AppColors.onSurfaceVariant,
-                        height: 1.35,
-                        fontSize:
-                            (Theme.of(context).textTheme.bodyMedium?.fontSize ?? 14) - 2,
-                      ),
-                      border: InputBorder.none,
-                      isCollapsed: true,
-                      contentPadding: const EdgeInsets.symmetric(
-                        vertical: 12,
-                        horizontal: 8,
-                      ),
-                    ),
-                  ),
-                ),
-                GestureDetector(
-                  onTap: replying ? null : onSend,
-                  child: Container(
-                    width: 44,
-                    height: 44,
-                    margin: const EdgeInsets.only(left: 6),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary,
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.primary.withValues(alpha: 0.2),
-                          blurRadius: 10,
-                          offset: const Offset(0, 2),
+                    Expanded(
+                      child: TextField(
+                        controller: controller,
+                        focusNode: focusNode,
+                        onTapOutside: (_) => focusNode.unfocus(),
+                        minLines: 1,
+                        maxLines: 5,
+                        textInputAction: TextInputAction.newline,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: AppColors.onSurface,
+                          height: 1.35,
+                          fontSize:
+                              (Theme.of(context).textTheme.bodyMedium?.fontSize ?? 14) - 2,
                         ),
-                      ],
+                        decoration: InputDecoration(
+                          hintText: placeholder,
+                          hintStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: AppColors.onSurfaceVariant,
+                            height: 1.35,
+                            fontSize:
+                                (Theme.of(context).textTheme.bodyMedium?.fontSize ?? 14) - 2,
+                          ),
+                          border: InputBorder.none,
+                          isCollapsed: true,
+                          contentPadding: const EdgeInsets.symmetric(
+                            vertical: 12,
+                            horizontal: 8,
+                          ),
+                        ),
+                      ),
                     ),
-                    child: replying
-                        ? const Padding(
-                            padding: EdgeInsets.all(10),
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: AppColors.white,
+                    GestureDetector(
+                      onTap: replying ? null : onSend,
+                      child: Container(
+                        width: 44,
+                        height: 44,
+                        margin: const EdgeInsets.only(left: 6),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary,
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.primary.withValues(alpha: 0.2),
+                              blurRadius: 10,
+                              offset: const Offset(0, 2),
                             ),
-                          )
-                        : const Icon(Icons.send, color: AppColors.white, size: 20),
-                  ),
+                          ],
+                        ),
+                        child: replying
+                            ? const Padding(
+                                padding: EdgeInsets.all(10),
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: AppColors.white,
+                                ),
+                              )
+                            : const Icon(Icons.send, color: AppColors.white, size: 20),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -146,14 +154,14 @@ class _InlineAttachmentPreview extends StatelessWidget {
       clipBehavior: Clip.none,
       children: [
         Container(
-          width: 42,
-          height: 42,
+          width: 64,
+          height: 64,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(16),
             border: Border.all(color: AppColors.surfaceContainerHighest),
           ),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(11),
+            borderRadius: BorderRadius.circular(15),
             child: ChatAttachmentImage(
               attachment: attachment,
               fit: BoxFit.cover,
