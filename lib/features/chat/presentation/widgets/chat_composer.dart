@@ -88,18 +88,20 @@ class AiChatComposer extends StatelessWidget {
             ),
           ),
           child: Container(
-            padding: const EdgeInsets.all(6),
+            constraints: const BoxConstraints(minHeight: 64),
+            padding: const EdgeInsets.fromLTRB(8, 8, 8, 8),
             decoration: BoxDecoration(
               color: AppColors.surfaceContainerLow,
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(22),
               border: Border.all(color: AppColors.surfaceContainerHighest),
             ),
             child: Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 IconButton(
                   onPressed: replying ? null : onToggleAttachment,
                   icon: const Icon(Icons.add_circle, color: AppColors.onSurfaceVariant),
+                  visualDensity: VisualDensity.compact,
                 ),
                 Expanded(
                   child: TextField(
@@ -109,23 +111,34 @@ class AiChatComposer extends StatelessWidget {
                     minLines: 1,
                     maxLines: 5,
                     textInputAction: TextInputAction.newline,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: AppColors.onSurface,
+                      height: 1.35,
+                    ),
                     decoration: InputDecoration(
                       hintText: placeholder,
+                      hintStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: AppColors.onSurfaceVariant,
+                        height: 1.35,
+                      ),
                       border: InputBorder.none,
                       isCollapsed: true,
-                      contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 6),
+                      contentPadding: const EdgeInsets.symmetric(
+                        vertical: 12,
+                        horizontal: 8,
+                      ),
                     ),
                   ),
                 ),
                 GestureDetector(
                   onTap: replying ? null : onSend,
                   child: Container(
-                    width: 42,
-                    height: 42,
-                    margin: const EdgeInsets.only(right: 2, bottom: 2),
+                    width: 44,
+                    height: 44,
+                    margin: const EdgeInsets.only(left: 6),
                     decoration: BoxDecoration(
                       color: AppColors.primary,
-                      borderRadius: BorderRadius.circular(14),
+                      borderRadius: BorderRadius.circular(16),
                       boxShadow: [
                         BoxShadow(
                           color: AppColors.primary.withValues(alpha: 0.2),

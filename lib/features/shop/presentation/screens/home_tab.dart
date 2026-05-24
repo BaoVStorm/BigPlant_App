@@ -448,7 +448,7 @@ class _HomeTabState extends State<HomeTab> {
                   crossAxisCount: 2,
                   mainAxisSpacing: 16,
                   crossAxisSpacing: 16,
-                  childAspectRatio: 0.68,
+                  childAspectRatio: 0.55,
                 ),
                 itemBuilder: (context, index) {
                   final product = _pageItems[index];

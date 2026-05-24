@@ -320,7 +320,9 @@ class _CartItemCard extends StatelessWidget {
                   Text(
                     priceFormatter(item.variant.compareAtPrice!),
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: AppColors.onSurfaceVariant,
+                      color: AppColors.error,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 13,
                       decoration: TextDecoration.lineThrough,
                     ),
                   ),
@@ -435,6 +437,17 @@ class _SummaryRow extends StatelessWidget {
             color: highlight ? AppColors.secondary : AppColors.onSurface,
             fontWeight: highlight ? FontWeight.w700 : FontWeight.w500,
           );
+
+    if (total) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label, style: labelStyle),
+          const SizedBox(height: 6),
+          Text(value, style: valueStyle),
+        ],
+      );
+    }
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
