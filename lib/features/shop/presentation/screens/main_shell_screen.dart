@@ -72,12 +72,12 @@ class _MainShellScreenState extends State<MainShellScreen> {
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 220),
                     padding: const EdgeInsets.symmetric(vertical: 8),
-                    decoration: BoxDecoration(
-                      color: selected
-                           ? AppColors.leafGreenSoft
-                           : Colors.transparent,
-                      borderRadius: BorderRadius.circular(999),
-                    ),
+                     decoration: BoxDecoration(
+                       color: selected
+                            ? AppColors.leafGreenSoft
+                            : Colors.transparent,
+                      borderRadius: BorderRadius.circular(20),
+                     ),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [

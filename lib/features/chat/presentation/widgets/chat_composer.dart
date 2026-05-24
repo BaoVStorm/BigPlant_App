@@ -80,7 +80,7 @@ class AiChatComposer extends StatelessWidget {
           ),
         Container(
           width: double.infinity,
-          padding: const EdgeInsets.fromLTRB(24, 12, 24, 12),
+          padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             color: AppColors.surface.withValues(alpha: 0.95),
             border: Border(

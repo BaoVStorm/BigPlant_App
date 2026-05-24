@@ -612,7 +612,7 @@ class AppLocalizations {
       'ai_chat_title': 'BigPlant AI',
       'ai_chat_status_online': 'Đang hoạt động',
       'ai_chat_day_today': 'Hôm nay',
-      'ai_chat_placeholder': 'Nhắn cho BigPlant AI...',
+      'ai_chat_placeholder': 'Nhắn tin cho BigPlant AI...',
       'ai_chat_nav_pending': 'Tab AI Chat đã được dựng giao diện nhưng chưa nối vào điều hướng ứng dụng.',
       'ai_chat_more_pending': 'Các thao tác bổ sung vẫn chưa được nối.',
     },
