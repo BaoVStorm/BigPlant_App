@@ -85,6 +85,101 @@ class AiAssistantAvatar extends StatelessWidget {
   }
 }
 
+class _AiMarkdownText extends StatelessWidget {
+  const _AiMarkdownText({
+    required this.text,
+    required this.style,
+  });
+
+  final String text;
+  final TextStyle? style;
+
+  @override
+  Widget build(BuildContext context) {
+    final effectiveStyle = style ?? DefaultTextStyle.of(context).style;
+    final lines = text.split('\n');
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        for (var i = 0; i < lines.length; i++) ...[
+          _buildLine(lines[i], effectiveStyle),
+          if (i != lines.length - 1)
+            SizedBox(height: lines[i].trim().isEmpty ? 8 : 4),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildLine(String line, TextStyle effectiveStyle) {
+    final bulletMatch = RegExp(r'^\s*-\s*(.*)$').firstMatch(line);
+    if (bulletMatch != null) {
+      final bulletText = bulletMatch.group(1)?.trimRight() ?? '';
+      return Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 1),
+            child: Text('•', style: effectiveStyle),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: RichText(
+              text: TextSpan(
+                style: effectiveStyle,
+                children: _parseMarkdownInline(bulletText, effectiveStyle),
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+
+    if (line.trim().isEmpty) {
+      return const SizedBox(height: 4);
+    }
+
+    return RichText(
+      text: TextSpan(
+        style: effectiveStyle,
+        children: _parseMarkdownInline(line.trimRight(), effectiveStyle),
+      ),
+    );
+  }
+
+  List<InlineSpan> _parseMarkdownInline(String value, TextStyle baseStyle) {
+    final spans = <InlineSpan>[];
+    final pattern = RegExp(r'(\*\*[^*]+?\*\*|\*[^*]+?\*)');
+    var cursor = 0;
+
+    for (final match in pattern.allMatches(value)) {
+      if (match.start > cursor) {
+        spans.add(TextSpan(text: value.substring(cursor, match.start)));
+      }
+
+      final token = match.group(0) ?? '';
+      if (token.startsWith('**') && token.endsWith('**')) {
+        spans.add(TextSpan(
+          text: token.substring(2, token.length - 2),
+          style: baseStyle.copyWith(fontWeight: FontWeight.w700),
+        ));
+      } else if (token.startsWith('*') && token.endsWith('*')) {
+        spans.add(TextSpan(
+          text: token.substring(1, token.length - 1),
+          style: baseStyle.copyWith(fontStyle: FontStyle.italic),
+        ));
+      }
+      cursor = match.end;
+    }
+
+    if (cursor < value.length) {
+      spans.add(TextSpan(text: value.substring(cursor)));
+    }
+    return spans;
+  }
+}
+
 class AiTextMessageBubble extends StatelessWidget {
   const AiTextMessageBubble({required this.message, super.key});
 
@@ -113,8 +208,8 @@ class AiTextMessageBubble extends StatelessWidget {
           ),
         ],
       ),
-      child: Text(
-        message.text,
+      child: _AiMarkdownText(
+        text: message.text,
         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: AppColors.onSurface,
               height: 1.55,
@@ -149,8 +244,8 @@ class AiInsightMessageBubble extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            message.text,
+          _AiMarkdownText(
+            text: message.text,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: AppColors.onSurfaceVariant,
                   height: 1.55,
@@ -217,8 +312,8 @@ class AiInsightMessageBubble extends StatelessWidget {
           ],
           if (message.followUpPrompt != null && message.followUpPrompt!.trim().isNotEmpty) ...[
             const SizedBox(height: 12),
-            Text(
-              message.followUpPrompt!,
+            _AiMarkdownText(
+              text: message.followUpPrompt!,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: AppColors.onSurfaceVariant,
                     fontStyle: FontStyle.italic,
@@ -262,8 +357,8 @@ class AiImageMessageBubble extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (message.text.trim().isNotEmpty) ...[
-            Text(
-              message.text,
+            _AiMarkdownText(
+              text: message.text,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: AppColors.onSurface,
                     height: 1.5,
