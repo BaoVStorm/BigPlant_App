@@ -1,9 +1,11 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/localization/app_localizations.dart';
-import '../../data/mock_ai_chat_repository.dart';
+import '../../data/ai_chat_repository.dart';
 import '../../domain/models/chat_message.dart';
 import '../widgets/chat_composer.dart';
 import '../widgets/chat_message_bubbles.dart';
@@ -23,7 +25,7 @@ class AiChatTab extends StatefulWidget {
 }
 
 class _AiChatTabState extends State<AiChatTab> {
-  final MockAiChatRepository _repository = MockAiChatRepository();
+  final AiChatRepository _repository = AiChatRepository();
   final ImagePicker _imagePicker = ImagePicker();
   final TextEditingController _composerController = TextEditingController();
   final FocusNode _composerFocusNode = FocusNode();
@@ -31,6 +33,7 @@ class _AiChatTabState extends State<AiChatTab> {
 
   List<AiChatMessage> _messages = const [];
   AiChatAttachment? _draftAttachment;
+  String _sessionId = AiChatRepository.fallbackSessionId;
   bool _loading = true;
   bool _replying = false;
 
@@ -67,7 +70,8 @@ class _AiChatTabState extends State<AiChatTab> {
     );
     if (picked == null || !mounted) return;
 
-    final image = await decodeImageFromList(await picked.readAsBytes());
+    final imageBytes = await picked.readAsBytes();
+    final image = await decodeImageFromList(imageBytes);
     if (!mounted) return;
 
     setState(() {
@@ -75,6 +79,9 @@ class _AiChatTabState extends State<AiChatTab> {
         id: 'draft-${DateTime.now().microsecondsSinceEpoch}',
         imageUrl: '',
         localFilePath: picked.path,
+        base64Data: base64Encode(imageBytes),
+        contentType: _guessImageContentType(picked.name),
+        fileName: picked.name,
         altText: picked.name,
         aspectRatio: image.width / image.height,
         caption: picked.name,
@@ -117,10 +124,14 @@ class _AiChatTabState extends State<AiChatTab> {
     });
     _scrollToBottom();
 
-    final reply = await _repository.buildReplyFor(userMessage);
+    final reply = await _repository.buildReplyFor(
+      userMessage,
+      sessionId: _sessionId,
+    );
     if (!mounted) return;
     setState(() {
-      _messages = [..._messages, reply];
+      _sessionId = reply.sessionId;
+      _messages = [..._messages, reply.message];
       _replying = false;
     });
     _scrollToBottom();
@@ -138,10 +149,18 @@ class _AiChatTabState extends State<AiChatTab> {
   }
 
   void _handleMore() {
-    final t = AppLocalizations.of(context);
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(t.t('ai_chat_more_pending'))),
+      SnackBar(content: Text('Session: $_sessionId')),
     );
+  }
+
+  String _guessImageContentType(String fileName) {
+    final lowerName = fileName.toLowerCase();
+    if (lowerName.endsWith('.png')) return 'image/png';
+    if (lowerName.endsWith('.webp')) return 'image/webp';
+    if (lowerName.endsWith('.heic')) return 'image/heic';
+    if (lowerName.endsWith('.heif')) return 'image/heif';
+    return 'image/jpeg';
   }
 
   void _scrollToBottom({bool jump = false}) {
@@ -188,7 +207,7 @@ class _AiChatTabState extends State<AiChatTab> {
               onBack: _handleBack,
               onMore: _handleMore,
               title: t.t('ai_chat_title'),
-              status: t.t('ai_chat_status_online'),
+              status: '${t.t('ai_chat_status_online')} - $_sessionId',
             ),
             Expanded(
               child: _loading

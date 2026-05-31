@@ -8,6 +8,9 @@ class AiChatAttachment {
     required this.imageUrl,
     required this.altText,
     this.localFilePath,
+    this.base64Data,
+    this.contentType,
+    this.fileName,
     this.aspectRatio = 1,
     this.caption = '',
   });
@@ -16,6 +19,9 @@ class AiChatAttachment {
   final String imageUrl;
   final String altText;
   final String? localFilePath;
+  final String? base64Data;
+  final String? contentType;
+  final String? fileName;
   final double aspectRatio;
   final String caption;
 

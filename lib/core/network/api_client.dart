@@ -102,7 +102,9 @@ class ApiClient {
       await AuthSessionManager.handleUnauthorized();
     }
 
-    final message = body['msg']?.toString() ?? 'Request failed';
+    final message = body['msg']?.toString() ??
+        body['detail']?.toString() ??
+        'Request failed';
     throw ApiException(message: message, statusCode: response.statusCode);
   }
 }
