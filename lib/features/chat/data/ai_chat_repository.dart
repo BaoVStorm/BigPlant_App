@@ -6,7 +6,9 @@ import 'ai_chat_api.dart';
 class AiChatRepository {
   AiChatRepository({AiChatApi? api}) : _api = api ?? AiChatApi(ApiClient());
 
-  static const String fallbackSessionId = 'session_mock';
+  static const String newSessionNote = 'Phiên chat mới';
+  static const String firstAssistantMessage =
+      'Xin chào! Tôi là trợ lý của BigPlant. Bạn muốn tìm hiểu về cây nào? Vui lòng nêu tên cây để tôi có thể kiểm tra dữ liệu cho bạn.';
 
   final AiChatApi _api;
 
@@ -15,10 +17,7 @@ class AiChatRepository {
   }) async {
     final userId = (await StorageService.getUserId())?.trim();
     if (userId == null || userId.isEmpty) {
-      return AiChatThread(
-        sessionId: fallbackSessionId,
-        messages: [_buildWelcomeMessage()],
-      );
+      return _buildLocalNewSession();
     }
 
     try {
@@ -32,14 +31,38 @@ class AiChatRepository {
           messages: messages.isEmpty ? [_buildWelcomeMessage()] : messages,
         );
       }
+      return createSession();
     } catch (_) {
       // Keep the chat usable even when history is temporarily unavailable.
     }
 
-    return AiChatThread(
-      sessionId: fallbackSessionId,
-      messages: [_buildWelcomeMessage()],
-    );
+    return _buildLocalNewSession();
+  }
+
+  Future<AiChatThread> createSession() async {
+    final userId = (await StorageService.getUserId())?.trim();
+    if (userId == null || userId.isEmpty) {
+      return _buildLocalNewSession();
+    }
+
+    try {
+      final payload = await _api.createSession(
+        userId: userId,
+        note: newSessionNote,
+      );
+      final data = _toMap(payload['data']);
+      final session = AiChatSession.fromApiOrNull(data['session']);
+      if (session != null) {
+        return AiChatThread(
+          sessionId: session.id,
+          messages: [_buildWelcomeMessage()],
+        );
+      }
+    } catch (_) {
+      // LLMChatBox can still create this session when the first user message is sent.
+    }
+
+    return _buildLocalNewSession();
   }
 
   Future<List<AiChatSession>> fetchSessions() async {
@@ -131,8 +154,14 @@ class AiChatRepository {
     return AiChatMessage.assistantText(
       id: 'welcome-live',
       sentAt: DateTime.now(),
-      text:
-          'Xin chào! Mình là trợ lý AI của BigPlant. Bạn có thể hỏi về giá, tồn kho, chọn cây phù hợp, chăm sóc cây hoặc gửi ảnh cây để mình hỗ trợ nhận diện.',
+      text: firstAssistantMessage,
+    );
+  }
+
+  AiChatThread _buildLocalNewSession() {
+    return AiChatThread(
+      sessionId: _generateClientSessionId(),
+      messages: [_buildWelcomeMessage()],
     );
   }
 
@@ -325,4 +354,8 @@ Map<String, dynamic> _toMap(dynamic raw) {
     return raw.map((key, value) => MapEntry(key.toString(), value));
   }
   return <String, dynamic>{};
+}
+
+String _generateClientSessionId() {
+  return 'session_${DateTime.now().microsecondsSinceEpoch.toRadixString(16)}';
 }

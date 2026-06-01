@@ -41,6 +41,20 @@ class AiChatApi {
     );
   }
 
+  Future<Map<String, dynamic>> createSession({
+    required String userId,
+    String note = 'Phiên chat mới',
+  }) {
+    return _client.post(
+      _buildBackendUrl('api/chat/sessions'),
+      body: {
+        'user_id': userId,
+        'note': note,
+      },
+      timeout: const Duration(seconds: 12),
+    );
+  }
+
   Future<Map<String, dynamic>> fetchMessages({
     required String sessionId,
     String? userId,

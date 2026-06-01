@@ -35,7 +35,7 @@ class _AiChatTabState extends State<AiChatTab> {
 
   List<AiChatMessage> _messages = const [];
   AiChatAttachment? _draftAttachment;
-  String _sessionId = AiChatRepository.fallbackSessionId;
+  String _sessionId = '';
   bool _loading = true;
   bool _replying = false;
   bool _hasLoadedConversation = false;
@@ -68,8 +68,7 @@ class _AiChatTabState extends State<AiChatTab> {
 
   Future<void> _handleTabActivated() async {
     if (_replying) return;
-    if (!_hasLoadedConversation ||
-        _sessionId == AiChatRepository.fallbackSessionId) {
+    if (!_hasLoadedConversation || _sessionId.trim().isEmpty) {
       await _loadConversation();
       return;
     }
@@ -133,9 +132,16 @@ class _AiChatTabState extends State<AiChatTab> {
   }
 
   Future<void> _sendCurrentDraft() async {
+    if (_loading) return;
+
     final text = _composerController.text.trim();
     final attachment = _draftAttachment;
     if (text.isEmpty && attachment == null) return;
+
+    if (_sessionId.trim().isEmpty) {
+      await _startNewSession(clearDraft: false);
+      if (!mounted || _sessionId.trim().isEmpty) return;
+    }
 
     final userMessage = attachment == null
         ? AiChatMessage.userText(
@@ -169,6 +175,36 @@ class _AiChatTabState extends State<AiChatTab> {
       _replying = false;
     });
     _scrollToBottom();
+  }
+
+  Future<void> _handleNewSession() async {
+    await _startNewSession();
+  }
+
+  Future<void> _startNewSession({bool clearDraft = true}) async {
+    setState(() {
+      _loading = true;
+      _replying = false;
+      if (clearDraft) _draftAttachment = null;
+    });
+
+    try {
+      final thread = await _repository.createSession();
+      if (!mounted) return;
+      setState(() {
+        _sessionId = thread.sessionId;
+        _messages = thread.messages;
+        _loading = false;
+        _hasLoadedConversation = true;
+      });
+      _scrollToBottom(jump: true);
+    } catch (error) {
+      if (!mounted) return;
+      setState(() => _loading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Không tạo được phiên chat mới: $error')),
+      );
+    }
   }
 
   Future<void> _handleSessionPicker() async {
@@ -266,6 +302,9 @@ class _AiChatTabState extends State<AiChatTab> {
   @override
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context);
+    final status = _sessionId.trim().isEmpty
+        ? 'Đang chuẩn bị phiên chat'
+        : '${t.t('ai_chat_status_online')} - $_sessionId';
     return Scaffold(
       backgroundColor: AppColors.backgroundTop,
       body: GestureDetector(
@@ -274,11 +313,14 @@ class _AiChatTabState extends State<AiChatTab> {
         child: Column(
           children: [
             _ChatHeader(
+              onNewSession: () {
+                _handleNewSession();
+              },
               onSessionPicker: () {
                 _handleSessionPicker();
               },
               title: t.t('ai_chat_title'),
-              status: '${t.t('ai_chat_status_online')} - $_sessionId',
+              status: status,
             ),
             Expanded(
               child: _loading
@@ -328,11 +370,13 @@ class _AiChatTabState extends State<AiChatTab> {
 
 class _ChatHeader extends StatelessWidget {
   const _ChatHeader({
+    required this.onNewSession,
     required this.onSessionPicker,
     required this.title,
     required this.status,
   });
 
+  final VoidCallback onNewSession;
   final VoidCallback onSessionPicker;
   final String title;
   final String status;
@@ -401,6 +445,11 @@ class _ChatHeader extends StatelessWidget {
                   ),
                 ],
               ),
+            ),
+            IconButton(
+              onPressed: onNewSession,
+              tooltip: 'Tạo phiên chat mới',
+              icon: const Icon(Icons.add, color: AppColors.onSurfaceVariant),
             ),
             IconButton(
               onPressed: onSessionPicker,
