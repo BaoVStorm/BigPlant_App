@@ -17,7 +17,10 @@ class AiChatRepository {
   }) async {
     final userId = (await StorageService.getUserId())?.trim();
     if (userId == null || userId.isEmpty) {
-      return _buildLocalNewSession();
+      throw ApiException(
+        message: 'Không tìm thấy user_id để tạo phiên chat.',
+        statusCode: 400,
+      );
     }
 
     try {
@@ -31,18 +34,20 @@ class AiChatRepository {
           messages: messages.isEmpty ? [_buildWelcomeMessage()] : messages,
         );
       }
-      return createSession();
     } catch (_) {
-      // Keep the chat usable even when history is temporarily unavailable.
+      // Fall through and ask the backend to create a persisted session.
     }
 
-    return _buildLocalNewSession();
+    return createSession();
   }
 
   Future<AiChatThread> createSession() async {
     final userId = (await StorageService.getUserId())?.trim();
     if (userId == null || userId.isEmpty) {
-      return _buildLocalNewSession();
+      throw ApiException(
+        message: 'Không tìm thấy user_id để tạo phiên chat.',
+        statusCode: 400,
+      );
     }
 
     try {
@@ -53,16 +58,26 @@ class AiChatRepository {
       final data = _toMap(payload['data']);
       final session = AiChatSession.fromApiOrNull(data['session']);
       if (session != null) {
+        final messages = _messagesFromApi(data['messages']);
+        if (messages.isEmpty) {
+          throw ApiException(
+            message: 'Server chưa lưu lời chào vào phiên chat.',
+            statusCode: 500,
+          );
+        }
         return AiChatThread(
           sessionId: session.id,
-          messages: [_buildWelcomeMessage()],
+          messages: messages,
         );
       }
     } catch (_) {
-      // LLMChatBox can still create this session when the first user message is sent.
+      // Surface a stable error instead of rendering an unsaved local session.
     }
 
-    return _buildLocalNewSession();
+    throw ApiException(
+      message: 'Không tạo được phiên chat mới trên server.',
+      statusCode: 500,
+    );
   }
 
   Future<List<AiChatSession>> fetchSessions() async {
@@ -155,13 +170,6 @@ class AiChatRepository {
       id: 'welcome-live',
       sentAt: DateTime.now(),
       text: firstAssistantMessage,
-    );
-  }
-
-  AiChatThread _buildLocalNewSession() {
-    return AiChatThread(
-      sessionId: _generateClientSessionId(),
-      messages: [_buildWelcomeMessage()],
     );
   }
 
@@ -354,8 +362,4 @@ Map<String, dynamic> _toMap(dynamic raw) {
     return raw.map((key, value) => MapEntry(key.toString(), value));
   }
   return <String, dynamic>{};
-}
-
-String _generateClientSessionId() {
-  return 'session_${DateTime.now().microsecondsSinceEpoch.toRadixString(16)}';
 }

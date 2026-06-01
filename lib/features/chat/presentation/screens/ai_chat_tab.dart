@@ -83,17 +83,25 @@ class _AiChatTabState extends State<AiChatTab> {
       });
     }
 
-    final thread = await _repository.loadInitialConversation(
-      scenario: widget.scenario,
-    );
-    if (!mounted) return;
-    setState(() {
-      _sessionId = thread.sessionId;
-      _messages = thread.messages;
-      _loading = false;
-      _hasLoadedConversation = true;
-    });
-    _scrollToBottom(jump: true);
+    try {
+      final thread = await _repository.loadInitialConversation(
+        scenario: widget.scenario,
+      );
+      if (!mounted) return;
+      setState(() {
+        _sessionId = thread.sessionId;
+        _messages = thread.messages;
+        _loading = false;
+        _hasLoadedConversation = true;
+      });
+      _scrollToBottom(jump: true);
+    } catch (error) {
+      if (!mounted) return;
+      setState(() => _loading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Không tạo được phiên chat mới: $error')),
+      );
+    }
   }
 
   Future<void> _toggleDraftAttachment() async {
