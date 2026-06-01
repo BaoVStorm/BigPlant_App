@@ -10,17 +10,65 @@ class AiChatRepository {
 
   final AiChatApi _api;
 
-  Future<List<AiChatMessage>> loadInitialConversation({
+  Future<AiChatThread> loadInitialConversation({
     AiChatMockScenario scenario = AiChatMockScenario.longConversation,
   }) async {
-    return [
-      AiChatMessage.assistantText(
-        id: 'welcome-live',
-        sentAt: DateTime.now(),
-        text:
-            'Xin chào! Mình là trợ lý AI của BigPlant. Bạn có thể hỏi về giá, tồn kho, chọn cây phù hợp, chăm sóc cây hoặc gửi ảnh cây để mình hỗ trợ nhận diện.',
-      ),
-    ];
+    final userId = (await StorageService.getUserId())?.trim();
+    if (userId == null || userId.isEmpty) {
+      return AiChatThread(
+        sessionId: fallbackSessionId,
+        messages: [_buildWelcomeMessage()],
+      );
+    }
+
+    try {
+      final payload = await _api.fetchLatestSessionChat(userId: userId);
+      final data = _toMap(payload['data']);
+      final session = AiChatSession.fromApiOrNull(data['session']);
+      final messages = _messagesFromApi(data['messages']);
+      if (session != null) {
+        return AiChatThread(
+          sessionId: session.id,
+          messages: messages.isEmpty ? [_buildWelcomeMessage()] : messages,
+        );
+      }
+    } catch (_) {
+      // Keep the chat usable even when history is temporarily unavailable.
+    }
+
+    return AiChatThread(
+      sessionId: fallbackSessionId,
+      messages: [_buildWelcomeMessage()],
+    );
+  }
+
+  Future<List<AiChatSession>> fetchSessions() async {
+    final userId = (await StorageService.getUserId())?.trim();
+    if (userId == null || userId.isEmpty) return const <AiChatSession>[];
+
+    final payload = await _api.fetchSessions(userId: userId);
+    final data = _toMap(payload['data']);
+    final rawSessions = data['sessions'];
+    if (rawSessions is! List) return const <AiChatSession>[];
+    return rawSessions
+        .map(AiChatSession.fromApiOrNull)
+        .whereType<AiChatSession>()
+        .toList(growable: false);
+  }
+
+  Future<AiChatThread> loadSessionChat(String sessionId) async {
+    final trimmedSessionId = sessionId.trim();
+    final userId = (await StorageService.getUserId())?.trim();
+    final payload = await _api.fetchMessages(
+      sessionId: trimmedSessionId,
+      userId: userId == null || userId.isEmpty ? null : userId,
+    );
+    final data = _toMap(payload['data']);
+    final messages = _messagesFromApi(data['messages']);
+    return AiChatThread(
+      sessionId: trimmedSessionId,
+      messages: messages.isEmpty ? [_buildWelcomeMessage()] : messages,
+    );
   }
 
   Future<AiChatReply> buildReplyFor(
@@ -78,6 +126,101 @@ class AiChatRepository {
       ],
     );
   }
+
+  AiChatMessage _buildWelcomeMessage() {
+    return AiChatMessage.assistantText(
+      id: 'welcome-live',
+      sentAt: DateTime.now(),
+      text:
+          'Xin chào! Mình là trợ lý AI của BigPlant. Bạn có thể hỏi về giá, tồn kho, chọn cây phù hợp, chăm sóc cây hoặc gửi ảnh cây để mình hỗ trợ nhận diện.',
+    );
+  }
+
+  List<AiChatMessage> _messagesFromApi(dynamic raw) {
+    if (raw is! List) return const <AiChatMessage>[];
+    return raw
+        .map((item) => _messageFromApi(_toMap(item)))
+        .whereType<AiChatMessage>()
+        .toList(growable: false);
+  }
+
+  AiChatMessage? _messageFromApi(Map<String, dynamic> raw) {
+    final id = _stringValue(
+      raw['id'],
+      fallback: 'history-${DateTime.now().microsecondsSinceEpoch}',
+    );
+    final role = _stringValue(raw['role']).toLowerCase();
+    final extra = _toMap(raw['extra']);
+    final sentAt = _dateTimeFromApi(raw['created_at']);
+    var content = _stringValue(raw['content']);
+
+    if (role == 'user') {
+      if (content.isEmpty && extra['image_detection'] != null) {
+        content = 'Đã gửi một hình ảnh cây.';
+      }
+      return AiChatMessage.userText(
+        id: id,
+        sentAt: sentAt,
+        text: content,
+      );
+    }
+
+    if (role == 'assistant') {
+      final followUp = _nullableString(extra['follow_up_message']);
+      return AiChatMessage(
+        id: id,
+        role: AiChatRole.assistant,
+        sentAt: sentAt,
+        text: content,
+        followUpPrompt: followUp,
+        quickReplies: _stringList(extra['suggested_questions']),
+      );
+    }
+
+    return null;
+  }
+}
+
+class AiChatThread {
+  const AiChatThread({
+    required this.sessionId,
+    required this.messages,
+  });
+
+  final String sessionId;
+  final List<AiChatMessage> messages;
+}
+
+class AiChatSession {
+  const AiChatSession({
+    required this.id,
+    required this.note,
+    this.createdAt,
+    this.updatedAt,
+  });
+
+  final String id;
+  final String note;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
+
+  factory AiChatSession.fromApi(Map<String, dynamic> raw) {
+    return AiChatSession(
+      id: _stringValue(raw['id']),
+      note: _stringValue(raw['note']),
+      createdAt: _nullableDateTimeFromApi(raw['created_at']),
+      updatedAt: _nullableDateTimeFromApi(raw['updated_at']),
+    );
+  }
+
+  static AiChatSession? fromApiOrNull(dynamic raw) {
+    final data = _toMap(raw);
+    final id = _stringValue(data['id']);
+    if (id.isEmpty) return null;
+    return AiChatSession.fromApi(data);
+  }
+
+  String get displayNote => note.trim().isNotEmpty ? note.trim() : id;
 }
 
 class AiChatReply {
@@ -150,6 +293,16 @@ String? _nullableString(dynamic value) {
   return text == null || text.isEmpty ? null : text;
 }
 
+DateTime _dateTimeFromApi(dynamic value) {
+  return _nullableDateTimeFromApi(value) ?? DateTime.now();
+}
+
+DateTime? _nullableDateTimeFromApi(dynamic value) {
+  final text = value?.toString().trim();
+  if (text == null || text.isEmpty) return null;
+  return DateTime.tryParse(text)?.toLocal();
+}
+
 List<String> _stringList(dynamic raw) {
   if (raw is! List) return const <String>[];
   return raw
@@ -160,7 +313,10 @@ List<String> _stringList(dynamic raw) {
 
 List<Map<String, dynamic>> _mapList(dynamic raw) {
   if (raw is! List) return const <Map<String, dynamic>>[];
-  return raw.map(_toMap).where((item) => item.isNotEmpty).toList(growable: false);
+  return raw
+      .map(_toMap)
+      .where((item) => item.isNotEmpty)
+      .toList(growable: false);
 }
 
 Map<String, dynamic> _toMap(dynamic raw) {

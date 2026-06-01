@@ -14,11 +14,13 @@ class AiChatTab extends StatefulWidget {
   const AiChatTab({
     this.scenario = AiChatMockScenario.longConversation,
     this.showBottomNavPreview = true,
+    this.active = true,
     super.key,
   });
 
   final AiChatMockScenario scenario;
   final bool showBottomNavPreview;
+  final bool active;
 
   @override
   State<AiChatTab> createState() => _AiChatTabState();
@@ -36,11 +38,24 @@ class _AiChatTabState extends State<AiChatTab> {
   String _sessionId = AiChatRepository.fallbackSessionId;
   bool _loading = true;
   bool _replying = false;
+  bool _hasLoadedConversation = false;
 
   @override
   void initState() {
     super.initState();
-    _loadConversation();
+    if (widget.active) {
+      _loadConversation(showLoading: false);
+    } else {
+      _loading = false;
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant AiChatTab oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!oldWidget.active && widget.active) {
+      _handleTabActivated();
+    }
   }
 
   @override
@@ -51,14 +66,33 @@ class _AiChatTabState extends State<AiChatTab> {
     super.dispose();
   }
 
-  Future<void> _loadConversation() async {
+  Future<void> _handleTabActivated() async {
+    if (_replying) return;
+    if (!_hasLoadedConversation ||
+        _sessionId == AiChatRepository.fallbackSessionId) {
+      await _loadConversation();
+      return;
+    }
+    await _loadSession(_sessionId, clearDraft: false, showLoading: false);
+  }
+
+  Future<void> _loadConversation({bool showLoading = true}) async {
+    if (showLoading && mounted) {
+      setState(() {
+        _loading = true;
+        _replying = false;
+      });
+    }
+
     final thread = await _repository.loadInitialConversation(
       scenario: widget.scenario,
     );
     if (!mounted) return;
     setState(() {
-      _messages = thread;
+      _sessionId = thread.sessionId;
+      _messages = thread.messages;
       _loading = false;
+      _hasLoadedConversation = true;
     });
     _scrollToBottom(jump: true);
   }
@@ -137,21 +171,57 @@ class _AiChatTabState extends State<AiChatTab> {
     _scrollToBottom();
   }
 
-  void _handleBack() {
-    final t = AppLocalizations.of(context);
-    if (Navigator.of(context).canPop()) {
-      Navigator.of(context).pop();
-      return;
-    }
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(t.t('ai_chat_nav_pending'))),
+  Future<void> _handleSessionPicker() async {
+    final sessionsFuture = _repository.fetchSessions();
+    if (!mounted) return;
+
+    await showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: AppColors.surface,
+      showDragHandle: true,
+      builder: (sheetContext) {
+        return _SessionPickerSheet(
+          sessionsFuture: sessionsFuture,
+          selectedSessionId: _sessionId,
+          onSessionSelected: (session) {
+            Navigator.of(sheetContext).pop();
+            _loadSession(session.id);
+          },
+        );
+      },
     );
   }
 
-  void _handleMore() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Session: $_sessionId')),
-    );
+  Future<void> _loadSession(
+    String sessionId, {
+    bool clearDraft = true,
+    bool showLoading = true,
+  }) async {
+    if (showLoading || clearDraft) {
+      setState(() {
+        if (showLoading) _loading = true;
+        _replying = false;
+        if (clearDraft) _draftAttachment = null;
+      });
+    }
+
+    try {
+      final thread = await _repository.loadSessionChat(sessionId);
+      if (!mounted) return;
+      setState(() {
+        _sessionId = thread.sessionId;
+        _messages = thread.messages;
+        _loading = false;
+        _hasLoadedConversation = true;
+      });
+      _scrollToBottom(jump: true);
+    } catch (error) {
+      if (!mounted) return;
+      setState(() => _loading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Không tải được phiên chat: $error')),
+      );
+    }
   }
 
   String _guessImageContentType(String fileName) {
@@ -204,8 +274,9 @@ class _AiChatTabState extends State<AiChatTab> {
         child: Column(
           children: [
             _ChatHeader(
-              onBack: _handleBack,
-              onMore: _handleMore,
+              onSessionPicker: () {
+                _handleSessionPicker();
+              },
               title: t.t('ai_chat_title'),
               status: '${t.t('ai_chat_status_online')} - $_sessionId',
             ),
@@ -257,14 +328,12 @@ class _AiChatTabState extends State<AiChatTab> {
 
 class _ChatHeader extends StatelessWidget {
   const _ChatHeader({
-    required this.onBack,
-    required this.onMore,
+    required this.onSessionPicker,
     required this.title,
     required this.status,
   });
 
-  final VoidCallback onBack;
-  final VoidCallback onMore;
+  final VoidCallback onSessionPicker;
   final String title;
   final String status;
 
@@ -281,11 +350,6 @@ class _ChatHeader extends StatelessWidget {
         ),
         child: Row(
           children: [
-            IconButton(
-              onPressed: onBack,
-              icon: const Icon(Icons.arrow_back, color: AppColors.onSurfaceVariant),
-            ),
-            const SizedBox(width: 8),
             Stack(
               clipBehavior: Clip.none,
               children: [
@@ -329,6 +393,8 @@ class _ChatHeader extends StatelessWidget {
                   ),
                   Text(
                     status,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
                           color: AppColors.outline,
                         ),
@@ -337,13 +403,129 @@ class _ChatHeader extends StatelessWidget {
               ),
             ),
             IconButton(
-              onPressed: onMore,
-              icon: const Icon(Icons.more_vert, color: AppColors.onSurfaceVariant),
+              onPressed: onSessionPicker,
+              tooltip: 'Chọn phiên chat',
+              icon: const Icon(Icons.history, color: AppColors.onSurfaceVariant),
             ),
           ],
         ),
       ),
     );
+  }
+}
+
+class _SessionPickerSheet extends StatelessWidget {
+  const _SessionPickerSheet({
+    required this.sessionsFuture,
+    required this.selectedSessionId,
+    required this.onSessionSelected,
+  });
+
+  final Future<List<AiChatSession>> sessionsFuture;
+  final String selectedSessionId;
+  final ValueChanged<AiChatSession> onSessionSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      top: false,
+      child: SizedBox(
+        height: MediaQuery.sizeOf(context).height * 0.58,
+        child: FutureBuilder<List<AiChatSession>>(
+          future: sessionsFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(
+                child: CircularProgressIndicator(color: AppColors.primary),
+              );
+            }
+
+            if (snapshot.hasError) {
+              return Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Text(
+                    'Không tải được danh sách phiên chat.',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: AppColors.onSurfaceVariant,
+                        ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              );
+            }
+
+            final sessions = snapshot.data ?? const <AiChatSession>[];
+            if (sessions.isEmpty) {
+              return Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Text(
+                    'Chưa có phiên chat nào.',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: AppColors.onSurfaceVariant,
+                        ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              );
+            }
+
+            return ListView.separated(
+              padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
+              itemCount: sessions.length,
+              separatorBuilder: (_, __) => Divider(
+                height: 1,
+                color: AppColors.surfaceContainerHighest,
+              ),
+              itemBuilder: (context, index) {
+                final session = sessions[index];
+                final selected = session.id == selectedSessionId;
+                return ListTile(
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 4,
+                    vertical: 6,
+                  ),
+                  leading: Icon(
+                    selected ? Icons.check_circle : Icons.history,
+                    color: selected
+                        ? AppColors.primary
+                        : AppColors.onSurfaceVariant,
+                  ),
+                  title: Text(
+                    session.displayNote,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: AppColors.onSurface,
+                          fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                        ),
+                  ),
+                  subtitle: Text(
+                    _formatSessionDate(session.updatedAt ?? session.createdAt),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: AppColors.outline,
+                        ),
+                  ),
+                  onTap: () => onSessionSelected(session),
+                );
+              },
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  String _formatSessionDate(DateTime? value) {
+    if (value == null) return 'Không rõ thời gian';
+    final day = value.day.toString().padLeft(2, '0');
+    final month = value.month.toString().padLeft(2, '0');
+    final hour = value.hour.toString().padLeft(2, '0');
+    final minute = value.minute.toString().padLeft(2, '0');
+    return '$day/$month/${value.year} $hour:$minute';
   }
 }
 

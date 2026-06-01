@@ -17,10 +17,64 @@ class AiChatApi {
       body: {
         'message': message,
         'session_id': sessionId,
-        if (userId != null && userId.trim().isNotEmpty) 'user_id': userId.trim(),
+        if (userId != null && userId.trim().isNotEmpty)
+          'user_id': userId.trim(),
         if (image != null) 'image': image.toJson(),
       },
       timeout: const Duration(seconds: 90),
+    );
+  }
+
+  Future<Map<String, dynamic>> fetchSessions({
+    required String userId,
+    int limit = 30,
+  }) {
+    return _client.get(
+      _buildBackendUrl(
+        'api/chat/sessions',
+        queryParameters: {
+          'user_id': userId,
+          'limit': '$limit',
+        },
+      ),
+      timeout: const Duration(seconds: 12),
+    );
+  }
+
+  Future<Map<String, dynamic>> fetchMessages({
+    required String sessionId,
+    String? userId,
+    int limit = 200,
+  }) {
+    return _client.get(
+      _buildBackendUrl(
+        'api/chat/messages',
+        queryParameters: {
+          'session_id': sessionId,
+          'limit': '$limit',
+          'order': 'asc',
+          if (userId != null && userId.trim().isNotEmpty)
+            'user_id': userId.trim(),
+        },
+      ),
+      timeout: const Duration(seconds: 12),
+    );
+  }
+
+  Future<Map<String, dynamic>> fetchLatestSessionChat({
+    required String userId,
+    int limit = 200,
+  }) {
+    return _client.get(
+      _buildBackendUrl(
+        'api/chat/latest',
+        queryParameters: {
+          'user_id': userId,
+          'limit': '$limit',
+          'order': 'asc',
+        },
+      ),
+      timeout: const Duration(seconds: 12),
     );
   }
 
@@ -28,6 +82,19 @@ class AiChatApi {
     final base = ApiConstants.llmChatBoxBaseUrl;
     final normalizedBase = base.endsWith('/') ? base : '$base/';
     return Uri.parse('$normalizedBase$path').toString();
+  }
+
+  String _buildBackendUrl(
+    String path, {
+    Map<String, String>? queryParameters,
+  }) {
+    final base = ApiConstants.baseUrl;
+    final normalizedBase = base.endsWith('/') ? base : '$base/';
+    final uri = Uri.parse('$normalizedBase$path');
+    if (queryParameters == null || queryParameters.isEmpty) {
+      return uri.toString();
+    }
+    return uri.replace(queryParameters: queryParameters).toString();
   }
 }
 

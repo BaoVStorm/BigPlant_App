@@ -33,7 +33,10 @@ class _MainShellScreenState extends State<MainShellScreen> {
       const HomeTab(),
       const ScanTab(),
       const CartTab(),
-      const AiChatTab(showBottomNavPreview: false),
+      AiChatTab(
+        showBottomNavPreview: false,
+        active: _currentIndex == 3,
+      ),
       const SettingsTab(),
     ];
 
