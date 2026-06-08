@@ -95,83 +95,102 @@ class _ForgotNewPasswordScreenState extends State<ForgotNewPasswordScreen> {
             child: const AuthTopBar(showBack: true),
           ),
           Expanded(
-            child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 512),
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(24, 40, 24, 24),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Text(
-                        t.t('auth_new_password_title'),
-                        style: Theme.of(context).textTheme.titleLarge,
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final minHeight =
+                    (constraints.maxHeight - 64)
+                        .clamp(0.0, double.infinity)
+                        .toDouble();
+
+                return SingleChildScrollView(
+                  keyboardDismissBehavior:
+                      ScrollViewKeyboardDismissBehavior.onDrag,
+                  padding: const EdgeInsets.fromLTRB(24, 32, 24, 24),
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        maxWidth: 512,
+                        minHeight: minHeight,
                       ),
-                      const SizedBox(height: 8),
-                      Text(
-                        t.t('auth_new_password_desc'),
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: AppColors.onSurfaceVariant,
+                      child: IntrinsicHeight(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Text(
+                              t.t('auth_new_password_title'),
+                              style: Theme.of(context).textTheme.titleLarge,
                             ),
-                      ),
-                      const SizedBox(height: 40),
-                      AuthInput(
-                        controller: _passwordCtrl,
-                        label: t.t('auth_new_password_label'),
-                        hint: t.t('auth_new_password_hint'),
-                        icon: Icons.lock_outline_rounded,
-                        obscureText: true,
-                        fillColor: AppColors.surfaceBright,
-                        borderRadius: 16,
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Icon(
-                            Icons.info_outline_rounded,
-                            size: 16,
-                            color: AppColors.onSurfaceVariant,
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              t.t('auth_password_rule'),
+                            const SizedBox(height: 8),
+                            Text(
+                              t.t('auth_new_password_desc'),
                               style: Theme.of(context)
                                   .textTheme
-                                  .labelSmall
+                                  .bodyMedium
                                   ?.copyWith(
                                     color: AppColors.onSurfaceVariant,
                                   ),
                             ),
-                          ),
-                        ],
+                            const SizedBox(height: 32),
+                            AuthInput(
+                              controller: _passwordCtrl,
+                              label: t.t('auth_new_password_label'),
+                              hint: t.t('auth_new_password_hint'),
+                              icon: Icons.lock_outline_rounded,
+                              obscureText: true,
+                              fillColor: AppColors.surfaceBright,
+                              borderRadius: 16,
+                            ),
+                            const SizedBox(height: 8),
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Icon(
+                                  Icons.info_outline_rounded,
+                                  size: 16,
+                                  color: AppColors.onSurfaceVariant,
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    t.t('auth_password_rule'),
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .labelSmall
+                                        ?.copyWith(
+                                          color: AppColors.onSurfaceVariant,
+                                        ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 24),
+                            AuthInput(
+                              controller: _rePasswordCtrl,
+                              label: t.t('auth_confirm_new_password_label'),
+                              hint: t.t('auth_confirm_new_password_hint'),
+                              icon: Icons.lock_outline_rounded,
+                              obscureText: true,
+                              fillColor: AppColors.surfaceBright,
+                              borderRadius: 16,
+                            ),
+                            if (_error != null) ...[
+                              const SizedBox(height: 18),
+                              AuthErrorBanner(message: _error!),
+                            ],
+                            const Spacer(),
+                            AuthPrimaryButton(
+                              label: t.t('auth_save_password'),
+                              loading: _loading,
+                              icon: Icons.check_rounded,
+                              onPressed: _submit,
+                            ),
+                          ],
+                        ),
                       ),
-                      const SizedBox(height: 24),
-                      AuthInput(
-                        controller: _rePasswordCtrl,
-                        label: t.t('auth_confirm_new_password_label'),
-                        hint: t.t('auth_confirm_new_password_hint'),
-                        icon: Icons.lock_outline_rounded,
-                        obscureText: true,
-                        fillColor: AppColors.surfaceBright,
-                        borderRadius: 16,
-                      ),
-                      if (_error != null) ...[
-                        const SizedBox(height: 18),
-                        AuthErrorBanner(message: _error!),
-                      ],
-                      const Spacer(),
-                      AuthPrimaryButton(
-                        label: t.t('auth_save_password'),
-                        loading: _loading,
-                        icon: Icons.check_rounded,
-                        onPressed: _submit,
-                      ),
-                    ],
+                    ),
                   ),
-                ),
-              ),
+                );
+              },
             ),
           ),
         ],
