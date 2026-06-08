@@ -535,6 +535,22 @@ class _AuthOtpInputState extends State<AuthOtpInput> {
     widget.controller.text = _digitControllers.map((item) => item.text).join();
   }
 
+  KeyEventResult _handleBackspaceOnEmpty(KeyEvent event, int index) {
+    if (event is! KeyDownEvent ||
+        event.logicalKey != LogicalKeyboardKey.backspace ||
+        index == 0 ||
+        _digitControllers[index].text.isNotEmpty) {
+      return KeyEventResult.ignored;
+    }
+
+    _focusNodes[index - 1].requestFocus();
+    final previousText = _digitControllers[index - 1].text;
+    _digitControllers[index - 1].selection = TextSelection.collapsed(
+      offset: previousText.length,
+    );
+    return KeyEventResult.handled;
+  }
+
   @override
   Widget build(BuildContext context) {
     final borderColor =
@@ -550,53 +566,59 @@ class _AuthOtpInputState extends State<AuthOtpInput> {
         return SizedBox(
           width: widget.boxSize,
           height: widget.boxSize,
-          child: TextField(
-            controller: _digitControllers[index],
-            focusNode: _focusNodes[index],
-            onTapOutside: (_) => FocusScope.of(context).unfocus(),
-            keyboardType: TextInputType.number,
-            textInputAction:
-                index == 3 ? TextInputAction.done : TextInputAction.next,
-            textAlign: TextAlign.center,
-            maxLength: 1,
-            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  color: textColor,
-                  fontWeight: FontWeight.w700,
+          child: Focus(
+            onKeyEvent: (_, event) => _handleBackspaceOnEmpty(event, index),
+            child: TextField(
+              controller: _digitControllers[index],
+              focusNode: _focusNodes[index],
+              onTapOutside: (_) => FocusScope.of(context).unfocus(),
+              keyboardType: TextInputType.number,
+              textInputAction:
+                  index == 3 ? TextInputAction.done : TextInputAction.next,
+              textAlign: TextAlign.center,
+              maxLength: 1,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                    color: textColor,
+                    fontWeight: FontWeight.w700,
+                  ),
+              decoration: InputDecoration(
+                counterText: '',
+                filled: true,
+                fillColor: fillColor,
+                hintText: '·',
+                hintStyle: TextStyle(
+                  color: AppColors.outline.withValues(alpha: 0.6),
                 ),
-            decoration: InputDecoration(
-              counterText: '',
-              filled: true,
-              fillColor: fillColor,
-              hintText: '·',
-              hintStyle: TextStyle(color: AppColors.outline.withValues(alpha: 0.6)),
-              contentPadding: EdgeInsets.zero,
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: BorderSide(
-                  color: borderColor,
-                  width: widget.hasError ? 2 : 1,
+                contentPadding: EdgeInsets.zero,
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide(
+                    color: borderColor,
+                    width: widget.hasError ? 2 : 1,
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide(
+                    color: widget.hasError ? AppColors.error : AppColors.primary,
+                    width: 2,
+                  ),
                 ),
               ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: BorderSide(
-                  color: widget.hasError ? AppColors.error : AppColors.primary,
-                  width: 2,
-                ),
-              ),
+              onChanged: (value) {
+                if (value.length > 1) {
+                  _digitControllers[index].text =
+                      value.substring(value.length - 1);
+                }
+                _updateParent();
+                if (value.isNotEmpty && index < _focusNodes.length - 1) {
+                  _focusNodes[index + 1].requestFocus();
+                } else if (value.isEmpty && index > 0) {
+                  _focusNodes[index - 1].requestFocus();
+                }
+              },
             ),
-            onChanged: (value) {
-              if (value.length > 1) {
-                _digitControllers[index].text = value.substring(value.length - 1);
-              }
-              _updateParent();
-              if (value.isNotEmpty && index < _focusNodes.length - 1) {
-                _focusNodes[index + 1].requestFocus();
-              } else if (value.isEmpty && index > 0) {
-                _focusNodes[index - 1].requestFocus();
-              }
-            },
           ),
         );
       }),
