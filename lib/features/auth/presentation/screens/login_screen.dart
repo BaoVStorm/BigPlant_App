@@ -7,6 +7,8 @@ import '../../domain/auth_service.dart';
 import '../widgets/auth_input.dart';
 import '../widgets/auth_layout.dart';
 
+const bool kGoogleLoginEnabled = false;
+
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -168,42 +170,45 @@ class _LoginScreenState extends State<LoginScreen> {
                         radius: 999,
                         onPressed: _login,
                       ),
-                      const SizedBox(height: 16),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Divider(
-                              color: AppColors.outlineVariant
-                                  .withValues(alpha: 0.5),
+                      if (kGoogleLoginEnabled) ...[
+                        const SizedBox(height: 16),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Divider(
+                                color: AppColors.outlineVariant
+                                    .withValues(alpha: 0.5),
+                              ),
                             ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 16),
-                            child: Text(
-                              t.t('auth_or'),
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .labelSmall
-                                  ?.copyWith(
-                                    color: AppColors.onSurfaceVariant,
-                                  ),
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 16),
+                              child: Text(
+                                t.t('auth_or'),
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .labelSmall
+                                    ?.copyWith(
+                                      color: AppColors.onSurfaceVariant,
+                                    ),
+                              ),
                             ),
-                          ),
-                          Expanded(
-                            child: Divider(
-                              color: AppColors.outlineVariant
-                                  .withValues(alpha: 0.5),
+                            Expanded(
+                              child: Divider(
+                                color: AppColors.outlineVariant
+                                    .withValues(alpha: 0.5),
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      AuthSecondaryButton(
-                        label: t.t('login_with_google'),
-                        icon: const _GoogleMark(),
-                        onPressed: () =>
-                            showToast(context, t.t('google_coming_soon')),
-                      ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        AuthSecondaryButton(
+                          label: t.t('login_with_google'),
+                          icon: const _GoogleMark(),
+                          onPressed: () =>
+                              showToast(context, t.t('google_coming_soon')),
+                        ),
+                      ],
                       const SizedBox(height: 28),
                       Wrap(
                         alignment: WrapAlignment.center,
