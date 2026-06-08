@@ -70,95 +70,113 @@ class _ForgotVerifyScreenState extends State<ForgotVerifyScreen> {
     final t = AppLocalizations.of(context);
     return AuthScaffold(
       includeDecorations: false,
-      child: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 480),
-          child: Padding(
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final minHeight =
+              (constraints.maxHeight - 80)
+                  .clamp(0.0, double.infinity)
+                  .toDouble();
+
+          return SingleChildScrollView(
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             padding: const EdgeInsets.fromLTRB(24, 40, 24, 40),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const Align(
-                  alignment: Alignment.centerLeft,
-                  child: AuthBackButton(size: 40),
+            child: Center(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxWidth: 480,
+                  minHeight: minHeight,
                 ),
-                const SizedBox(height: 32),
-                Text(
-                  t.t('auth_forgot_otp_title'),
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        color: AppColors.onSurface,
-                      ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  t.t('auth_forgot_otp_desc'),
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: AppColors.onSurfaceVariant,
-                      ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  widget.email,
-                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                        color: AppColors.primary,
-                        fontWeight: FontWeight.w700,
-                      ),
-                ),
-                const SizedBox(height: 40),
-                AuthOtpInput(
-                  controller: _otpCtrl,
-                  hasError: _error != null,
-                ),
-                if (_error != null) ...[
-                  const SizedBox(height: 12),
-                  Row(
+                child: IntrinsicHeight(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      const Icon(
-                        Icons.error_rounded,
-                        color: AppColors.error,
-                        size: 16,
+                      const Align(
+                        alignment: Alignment.centerLeft,
+                        child: AuthBackButton(size: 40),
                       ),
-                      const SizedBox(width: 6),
-                      Expanded(
-                        child: Text(
-                          _error!,
-                          style:
-                              Theme.of(context).textTheme.labelSmall?.copyWith(
-                                    color: AppColors.error,
-                                    fontWeight: FontWeight.w600,
-                                  ),
+                      const SizedBox(height: 32),
+                      Text(
+                        t.t('auth_forgot_otp_title'),
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                              color: AppColors.onSurface,
+                            ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        t.t('auth_forgot_otp_desc'),
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: AppColors.onSurfaceVariant,
+                            ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        widget.email,
+                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                              color: AppColors.primary,
+                              fontWeight: FontWeight.w700,
+                            ),
+                      ),
+                      const SizedBox(height: 40),
+                      AuthOtpInput(
+                        controller: _otpCtrl,
+                        hasError: _error != null,
+                      ),
+                      if (_error != null) ...[
+                        const SizedBox(height: 12),
+                        Row(
+                          children: [
+                            const Icon(
+                              Icons.error_rounded,
+                              color: AppColors.error,
+                              size: 16,
+                            ),
+                            const SizedBox(width: 6),
+                            Expanded(
+                              child: Text(
+                                _error!,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .labelSmall
+                                    ?.copyWith(
+                                      color: AppColors.error,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                              ),
+                            ),
+                          ],
                         ),
+                      ],
+                      const Spacer(),
+                      AuthPrimaryButton(
+                        label: t.t('verify_email'),
+                        loading: _loading,
+                        onPressed: _verify,
+                      ),
+                      const SizedBox(height: 24),
+                      Wrap(
+                        alignment: WrapAlignment.center,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        children: [
+                          Text(
+                            '${t.t('didnt_get_email')} ',
+                            style:
+                                Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                      color: AppColors.onSurfaceVariant,
+                                    ),
+                          ),
+                          TextButton(
+                            onPressed: _resend,
+                            child: Text(t.t('resend')),
+                          ),
+                        ],
                       ),
                     ],
                   ),
-                ],
-                const Spacer(),
-                AuthPrimaryButton(
-                  label: t.t('verify_email'),
-                  loading: _loading,
-                  onPressed: _verify,
                 ),
-                const SizedBox(height: 24),
-                Wrap(
-                  alignment: WrapAlignment.center,
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  children: [
-                    Text(
-                      '${t.t('didnt_get_email')} ',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: AppColors.onSurfaceVariant,
-                          ),
-                    ),
-                    TextButton(
-                      onPressed: _resend,
-                      child: Text(t.t('resend')),
-                    ),
-                  ],
-                ),
-              ],
+              ),
             ),
-          ),
-        ),
+          );
+        },
       ),
     );
   }
