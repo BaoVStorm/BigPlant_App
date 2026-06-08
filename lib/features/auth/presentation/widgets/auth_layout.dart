@@ -494,61 +494,48 @@ class AuthOtpInput extends StatefulWidget {
 }
 
 class _AuthOtpInputState extends State<AuthOtpInput> {
-  late final List<TextEditingController> _digitControllers;
-  late final List<FocusNode> _focusNodes;
+  late final FocusNode _focusNode;
 
   @override
   void initState() {
     super.initState();
-    _digitControllers = List.generate(4, (_) => TextEditingController());
-    _focusNodes = List.generate(4, (_) => FocusNode());
-    _syncFromParent();
+    _focusNode = FocusNode();
+    _focusNode.addListener(_notifyChanged);
+    widget.controller.addListener(_notifyChanged);
   }
 
   @override
   void didUpdateWidget(covariant AuthOtpInput oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.controller != widget.controller) {
-      _syncFromParent();
+      oldWidget.controller.removeListener(_notifyChanged);
+      widget.controller.addListener(_notifyChanged);
     }
   }
 
   @override
   void dispose() {
-    for (final controller in _digitControllers) {
-      controller.dispose();
-    }
-    for (final node in _focusNodes) {
-      node.dispose();
-    }
+    _focusNode.removeListener(_notifyChanged);
+    widget.controller.removeListener(_notifyChanged);
+    _focusNode.dispose();
     super.dispose();
   }
 
-  void _syncFromParent() {
-    final value = widget.controller.text;
-    for (var i = 0; i < _digitControllers.length; i++) {
-      _digitControllers[i].text = i < value.length ? value[i] : '';
+  void _notifyChanged() {
+    if (mounted) {
+      setState(() {});
     }
   }
 
-  void _updateParent() {
-    widget.controller.text = _digitControllers.map((item) => item.text).join();
-  }
-
-  KeyEventResult _handleBackspaceOnEmpty(KeyEvent event, int index) {
-    if (event is! KeyDownEvent ||
-        event.logicalKey != LogicalKeyboardKey.backspace ||
-        index == 0 ||
-        _digitControllers[index].text.isNotEmpty) {
-      return KeyEventResult.ignored;
+  void _normalizeValue(String value) {
+    final digits = value.replaceAll(RegExp(r'\D'), '');
+    final normalized = digits.length > 4 ? digits.substring(0, 4) : digits;
+    if (normalized != widget.controller.text) {
+      widget.controller.value = TextEditingValue(
+        text: normalized,
+        selection: TextSelection.collapsed(offset: normalized.length),
+      );
     }
-
-    _focusNodes[index - 1].requestFocus();
-    final previousText = _digitControllers[index - 1].text;
-    _digitControllers[index - 1].selection = TextSelection.collapsed(
-      offset: previousText.length,
-    );
-    return KeyEventResult.handled;
   }
 
   @override
@@ -559,69 +546,70 @@ class _AuthOtpInputState extends State<AuthOtpInput> {
         ? AppColors.errorContainer.withValues(alpha: 0.32)
         : AppColors.surface;
     final textColor = widget.hasError ? AppColors.error : AppColors.primary;
+    final value = widget.controller.text;
+    final activeIndex = value.length >= 4 ? 3 : value.length;
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: List.generate(4, (index) {
-        return SizedBox(
-          width: widget.boxSize,
-          height: widget.boxSize,
-          child: Focus(
-            onKeyEvent: (_, event) => _handleBackspaceOnEmpty(event, index),
+    return Stack(
+      children: [
+        Positioned.fill(
+          child: Opacity(
+            opacity: 0,
             child: TextField(
-              controller: _digitControllers[index],
-              focusNode: _focusNodes[index],
+              controller: widget.controller,
+              focusNode: _focusNode,
               onTapOutside: (_) => FocusScope.of(context).unfocus(),
               keyboardType: TextInputType.number,
-              textInputAction:
-                  index == 3 ? TextInputAction.done : TextInputAction.next,
-              textAlign: TextAlign.center,
-              maxLength: 1,
+              textInputAction: TextInputAction.done,
+              maxLength: 4,
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    color: textColor,
-                    fontWeight: FontWeight.w700,
-                  ),
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
+                border: InputBorder.none,
                 counterText: '',
-                filled: true,
-                fillColor: fillColor,
-                hintText: '·',
-                hintStyle: TextStyle(
-                  color: AppColors.outline.withValues(alpha: 0.6),
-                ),
-                contentPadding: EdgeInsets.zero,
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide(
-                    color: borderColor,
-                    width: widget.hasError ? 2 : 1,
-                  ),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide(
-                    color: widget.hasError ? AppColors.error : AppColors.primary,
-                    width: 2,
-                  ),
-                ),
               ),
-              onChanged: (value) {
-                if (value.length > 1) {
-                  _digitControllers[index].text =
-                      value.substring(value.length - 1);
-                }
-                _updateParent();
-                if (value.isNotEmpty && index < _focusNodes.length - 1) {
-                  _focusNodes[index + 1].requestFocus();
-                } else if (value.isEmpty && index > 0) {
-                  _focusNodes[index - 1].requestFocus();
-                }
-              },
+              onChanged: _normalizeValue,
             ),
           ),
-        );
-      }),
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: List.generate(4, (index) {
+            final isFocused = _focusNode.hasFocus && index == activeIndex;
+            final digit = index < value.length ? value[index] : null;
+            return GestureDetector(
+              onTap: () {
+                _focusNode.requestFocus();
+                widget.controller.selection = TextSelection.collapsed(
+                  offset: widget.controller.text.length,
+                );
+              },
+              child: Container(
+                width: widget.boxSize,
+                height: widget.boxSize,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: fillColor,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: isFocused && !widget.hasError
+                        ? AppColors.primary
+                        : borderColor,
+                    width: isFocused || widget.hasError ? 2 : 1,
+                  ),
+                ),
+                child: Text(
+                  digit ?? '·',
+                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                        color: digit == null
+                            ? AppColors.outline.withValues(alpha: 0.6)
+                            : textColor,
+                        fontWeight: FontWeight.w700,
+                      ),
+                ),
+              ),
+            );
+          }),
+        ),
+      ],
     );
   }
 }
