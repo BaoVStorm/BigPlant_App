@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../../../../core/constants/api_constants.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/widgets/app_network_image.dart';
@@ -31,6 +32,7 @@ class _HomeTabState extends State<HomeTab> {
   String _searchQuery = '';
   int _currentPage = 0;
   String _fullName = '';
+  String? _photoUrl;
   bool _loadingProducts = true;
   bool _loadingCategories = true;
   String? _loadError;
@@ -55,8 +57,12 @@ class _HomeTabState extends State<HomeTab> {
 
   Future<void> _loadProfile() async {
     final fullName = (await StorageService.getFullName())?.trim() ?? '';
+    final photoUrl = (await StorageService.getPhotoUrl())?.trim() ?? '';
     if (!mounted) return;
-    setState(() => _fullName = fullName);
+    setState(() {
+      _fullName = fullName;
+      _photoUrl = photoUrl.isNotEmpty ? photoUrl : null;
+    });
   }
 
   Future<void> _openEditProfile() async {
@@ -66,6 +72,7 @@ class _HomeTabState extends State<HomeTab> {
     final phoneNumber = (await StorageService.getPhoneNumber())?.trim() ?? '';
     final dateOfBirth = (await StorageService.getDateOfBirth())?.trim() ?? '';
     final gender = (await StorageService.getGender())?.trim() ?? '';
+    final photoUrl = (await StorageService.getPhotoUrl())?.trim() ?? '';
     
     if (!mounted) return;
     
@@ -78,6 +85,7 @@ class _HomeTabState extends State<HomeTab> {
           phoneNumber: phoneNumber,
           dateOfBirth: dateOfBirth,
           gender: gender,
+          photoUrl: photoUrl.isNotEmpty ? photoUrl : null,
         ),
       ),
     );
@@ -293,12 +301,21 @@ class _HomeTabState extends State<HomeTab> {
                     ],
                   ),
                   alignment: Alignment.center,
-                  child: Text(
-                    _avatarInitial,
-                    style: theme.textTheme.headlineMedium?.copyWith(
-                      color: AppColors.primary,
-                      fontSize: 24,
-                    ),
+                  child: ClipOval(
+                    child: (_photoUrl != null && _photoUrl!.isNotEmpty)
+                      ? AppNetworkImage(
+                          imageUrl: _photoUrl!,
+                          width: 64,
+                          height: 64,
+                          fit: BoxFit.cover,
+                        )
+                      : Text(
+                          _avatarInitial,
+                          style: theme.textTheme.headlineMedium?.copyWith(
+                            color: AppColors.primary,
+                            fontSize: 24,
+                          ),
+                        ),
                   ),
                 ),
               ],

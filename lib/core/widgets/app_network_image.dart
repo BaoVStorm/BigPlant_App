@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../constants/api_constants.dart';
 import '../constants/app_colors.dart';
 
 class AppNetworkImage extends StatelessWidget {
@@ -20,8 +21,12 @@ class AppNetworkImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final String url = imageUrl.startsWith('http')
+        ? imageUrl
+        : '${ApiConstants.baseUrl.replaceAll(RegExp(r'/$'), '')}$imageUrl';
+
     return Image.network(
-      imageUrl,
+      url,
       fit: fit,
       width: width,
       height: height,

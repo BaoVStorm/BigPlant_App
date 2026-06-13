@@ -274,9 +274,9 @@ class _EditUserScreenState extends State<EditUserScreen> {
                     alignment: Alignment.center,
                     child: ClipOval(
                       child: _avatarBytes != null
-                        ? Image.memory(_avatarBytes!, fit: BoxFit.cover)
+                        ? Image.memory(_avatarBytes!, width: 128, height: 128, fit: BoxFit.cover)
                         : (widget.photoUrl != null && widget.photoUrl!.isNotEmpty)
-                          ? AppNetworkImage(imageUrl: widget.photoUrl!, fit: BoxFit.cover)
+                          ? AppNetworkImage(imageUrl: widget.photoUrl!, width: 128, height: 128, fit: BoxFit.cover)
                           : Text(
                               _initials(),
                               style: theme.textTheme.titleLarge?.copyWith(

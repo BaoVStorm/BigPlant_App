@@ -23,6 +23,7 @@ class AuthService {
         phoneNumber: user['phone_number']?.toString(),
         dateOfBirth: user['date_of_birth']?.toString(),
         gender: user['gender']?.toString(),
+        photoUrl: user['photo_url']?.toString(),
       );
     }
   }
