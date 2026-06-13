@@ -285,7 +285,7 @@ class _SettingsProfileCard extends StatelessWidget {
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
-                  border: Border.all(color: AppColors.surfaceContainerHigh, width: 2),
+                  border: Border.all(color: AppColors.surfaceContainerHigh, width: 1),
                 ),
                 alignment: Alignment.center,
                 child: ClipOval(

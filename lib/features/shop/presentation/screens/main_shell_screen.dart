@@ -30,7 +30,7 @@ class _MainShellScreenState extends State<MainShellScreen> {
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context);
     final tabs = <Widget>[
-      const HomeTab(),
+      HomeTab(active: _currentIndex == 0),
       const ScanTab(),
       const CartTab(),
       AiChatTab(

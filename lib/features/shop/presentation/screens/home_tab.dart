@@ -15,7 +15,9 @@ import 'edit_user_screen.dart';
 import 'product_detail_screen.dart';
 
 class HomeTab extends StatefulWidget {
-  const HomeTab({super.key});
+  const HomeTab({this.active = true, super.key});
+
+  final bool active;
 
   @override
   State<HomeTab> createState() => _HomeTabState();
@@ -46,6 +48,14 @@ class _HomeTabState extends State<HomeTab> {
     super.initState();
     _loadProfile();
     _loadCatalog();
+  }
+
+  @override
+  void didUpdateWidget(HomeTab oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.active && !oldWidget.active) {
+      _loadProfile();
+    }
   }
 
   @override
@@ -292,6 +302,7 @@ class _HomeTabState extends State<HomeTab> {
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
+                    border: Border.all(color: AppColors.surfaceContainerHigh, width: 1),
                     boxShadow: [
                       BoxShadow(
                         color: AppColors.primary.withValues(alpha: 0.06),
