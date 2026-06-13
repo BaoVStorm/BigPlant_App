@@ -36,7 +36,7 @@ class LocalCartSession {
     return const DeliveryMethod(
       title: 'Giao hàng tiêu chuẩn',
       subtitle: 'Dự kiến giao: 2-3 ngày',
-      fee: 50000,
+      fee: 1,
     );
   }
 

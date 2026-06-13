@@ -140,7 +140,7 @@ class _CartTabState extends State<CartTab> {
           deliveryMethod: const DeliveryMethod(
             title: 'Giao hàng tiêu chuẩn',
             subtitle: 'Dự kiến giao: 2-3 ngày',
-            fee: 50000,
+            fee: 1,
           ),
           paymentMethod: const PaymentMethodOption(
             title: 'Thanh toán khi nhận hàng (COD)',
