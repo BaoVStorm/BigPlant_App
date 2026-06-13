@@ -70,15 +70,14 @@ class OrderBreakdown {
   const OrderBreakdown({
     required this.subtotal,
     required this.shippingFee,
+    required this.originalDiscount,
     required this.discount,
+    required this.total,
   });
 
   final double subtotal;
   final double shippingFee;
+  final double originalDiscount;
   final double discount;
-
-  double get total {
-    final effectiveDiscount = discount > subtotal ? subtotal : discount;
-    return subtotal + shippingFee - effectiveDiscount;
-  }
+  final double total;
 }

@@ -24,7 +24,9 @@ class _CartTabState extends State<CartTab> {
   OrderBreakdown _breakdown = const OrderBreakdown(
     subtotal: 0,
     shippingFee: 0,
+    originalDiscount: 0,
     discount: 0,
+    total: 0,
   );
   String _fullName = '';
   bool _loading = true;
@@ -251,7 +253,7 @@ class _CartTabState extends State<CartTab> {
                             ),
                             if (_breakdown.discount > 0) ...[
                               const SizedBox(height: 12),
-                              if (_breakdown.discount > _breakdown.subtotal && _breakdown.subtotal > 0)
+                              if (_breakdown.originalDiscount > _breakdown.discount)
                                 _SummaryRow(
                                   label: t.t('order_discount_label'),
                                   value: '',
@@ -259,7 +261,7 @@ class _CartTabState extends State<CartTab> {
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
                                       Text(
-                                        '-${_formatCurrency(_breakdown.discount)}',
+                                        '-${_formatCurrency(_breakdown.originalDiscount)}',
                                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                                               color: AppColors.onSurfaceVariant,
                                               decoration: TextDecoration.lineThrough,
@@ -267,7 +269,7 @@ class _CartTabState extends State<CartTab> {
                                       ),
                                       const SizedBox(width: 8),
                                       Text(
-                                        '-${_formatCurrency(_breakdown.subtotal)}',
+                                        '-${_formatCurrency(_breakdown.discount)}',
                                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                                               color: AppColors.secondary,
                                               fontWeight: FontWeight.w600,

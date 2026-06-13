@@ -88,6 +88,7 @@ class ShopService {
       cartId: _asString(cartJson['id']),
       status: _asString(cartJson['status']),
       subtotalAmount: _asDouble(cartJson['subtotal_amount']),
+      originalDiscountAmount: _asDouble(cartJson['original_discount_amount']),
       discountAmount: _asDouble(cartJson['discount_amount']),
       shippingAmount: _asDouble(cartJson['shipping_amount']),
       totalAmount: _asDouble(cartJson['total_amount']),
@@ -128,6 +129,7 @@ class CartData {
     required this.cartId,
     required this.status,
     required this.subtotalAmount,
+    required this.originalDiscountAmount,
     required this.discountAmount,
     required this.shippingAmount,
     required this.totalAmount,
@@ -137,6 +139,7 @@ class CartData {
   final String cartId;
   final String status;
   final double subtotalAmount;
+  final double originalDiscountAmount;
   final double discountAmount;
   final double shippingAmount;
   final double totalAmount;
@@ -145,7 +148,9 @@ class CartData {
   OrderBreakdown get breakdown => OrderBreakdown(
         subtotal: subtotalAmount,
         shippingFee: shippingAmount,
+        originalDiscount: originalDiscountAmount,
         discount: discountAmount,
+        total: totalAmount,
       );
 }
 

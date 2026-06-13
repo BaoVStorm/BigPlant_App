@@ -153,7 +153,7 @@ class OrderSummaryScreen extends StatelessWidget {
                 const SizedBox(height: 10),
                 _MoneyRow(label: t.t('order_shipping_fee_label'), value: _formatCurrency(breakdown.shippingFee)),
                 const SizedBox(height: 10),
-                if (breakdown.discount > breakdown.subtotal && breakdown.subtotal > 0)
+                if (breakdown.originalDiscount > breakdown.discount)
                   _MoneyRow(
                     label: t.t('order_discount_label'),
                     value: '',
@@ -161,7 +161,7 @@ class OrderSummaryScreen extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          '-${_formatCurrency(breakdown.discount)}',
+                          '-${_formatCurrency(breakdown.originalDiscount)}',
                           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                                 color: AppColors.onSurfaceVariant,
                                 decoration: TextDecoration.lineThrough,
@@ -169,7 +169,7 @@ class OrderSummaryScreen extends StatelessWidget {
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          '-${_formatCurrency(breakdown.subtotal)}',
+                          '-${_formatCurrency(breakdown.discount)}',
                           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                                 color: AppColors.secondary,
                                 fontWeight: FontWeight.w600,
