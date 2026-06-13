@@ -7,6 +7,7 @@ import 'package:latlong2/latlong.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/localization/app_localizations.dart';
+import '../../../../core/widgets/app_toast.dart';
 import '../../domain/models/plant_scan_result.dart';
 import '../../domain/scan_service.dart';
 
@@ -189,10 +190,9 @@ class _ScanResultScreenState extends State<ScanResultScreen> {
   }
 
   void _showTtsUnavailable(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Text-to-speech is unavailable. Please restart the app.'),
-      ),
+    AppToast.showError(
+      context,
+      'Text-to-speech is unavailable. Please restart the app.',
     );
   }
 
@@ -235,10 +235,9 @@ class _ScanResultScreenState extends State<ScanResultScreen> {
     ].join('\n');
 
     Clipboard.setData(ClipboardData(text: payload));
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(AppLocalizations.of(context).t('toast_saved_clipboard')),
-      ),
+    AppToast.showSuccess(
+      context,
+      AppLocalizations.of(context).t('toast_saved_clipboard'),
     );
   }
 

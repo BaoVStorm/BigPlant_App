@@ -9,6 +9,7 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/localization/app_localizations.dart';
+import '../../../../core/widgets/app_toast.dart';
 import '../../domain/local_onnx_scan_service.dart';
 import '../../domain/models/plant_scan_result.dart';
 import '../../domain/scan_service.dart';
@@ -315,8 +316,9 @@ class _CameraRealtimeScanScreenState extends State<CameraRealtimeScanScreen> {
       setState(() => _isFlashEnabled = enabled);
     } catch (_) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Flash is unavailable on this device.')),
+      AppToast.showError(
+        context,
+        'Flash is unavailable on this device.',
       );
     }
   }
@@ -350,8 +352,9 @@ class _CameraRealtimeScanScreenState extends State<CameraRealtimeScanScreen> {
       );
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString())),
+      AppToast.showError(
+        context,
+        e.toString(),
       );
     } finally {
       _resumeScanning();
@@ -363,8 +366,9 @@ class _CameraRealtimeScanScreenState extends State<CameraRealtimeScanScreen> {
     final result = _latestResult;
     if (jpeg == null || result == null) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No stable plant prediction yet.')),
+      AppToast.showError(
+        context,
+        'No stable plant prediction yet.',
       );
       return;
     }

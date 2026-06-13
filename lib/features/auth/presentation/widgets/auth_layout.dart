@@ -5,6 +5,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_globals.dart';
 import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/localization/locale_controller.dart';
+import '../../../../core/widgets/app_toast.dart';
 
 const String bigPlantLogoAsset = 'assets/branding/bigplant_logo.png';
 
@@ -615,7 +616,7 @@ class _AuthOtpInputState extends State<AuthOtpInput> {
 }
 
 void showToast(BuildContext context, String message) {
-  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+  AppToast.showError(context, message);
 }
 
 Widget appLogo() {

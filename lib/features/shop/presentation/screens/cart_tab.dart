@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/widgets/app_network_image.dart';
+import '../../../../core/widgets/app_toast.dart';
 import '../../../auth/data/storage_service.dart';
 import '../../domain/models/cart_checkout.dart';
 import '../../domain/shop_service.dart';
@@ -118,9 +119,7 @@ class _CartTabState extends State<CartTab> {
   }
 
   void _showMessage(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
+    AppToast.showError(context, message);
   }
 
   String _formatCurrency(double value) {

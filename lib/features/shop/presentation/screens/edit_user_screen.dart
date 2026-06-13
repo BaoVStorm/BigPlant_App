@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/localization/app_localizations.dart';
+import '../../../../core/widgets/app_toast.dart';
 import '../../../auth/domain/auth_service.dart';
 
 class EditUserScreen extends StatefulWidget {
@@ -110,8 +111,9 @@ class _EditUserScreenState extends State<EditUserScreen> {
     final t = AppLocalizations.of(context);
     final phone = _phoneCtrl.text.trim();
     if (!_isValidPhone(phone)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(t.t('settings_invalid_phone'))),
+      AppToast.showError(
+        context,
+        t.t('settings_invalid_phone'),
       );
       return;
     }
@@ -127,23 +129,26 @@ class _EditUserScreenState extends State<EditUserScreen> {
       );
       if (!mounted) return;
       setState(() => _saving = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(t.t('settings_saved'))),
+      AppToast.showSuccess(
+        context,
+        t.t('settings_saved'),
       );
       Navigator.of(context).pop(true);
     } catch (e) {
       if (!mounted) return;
       setState(() => _saving = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to update profile: $e')),
+      AppToast.showError(
+        context,
+        'Failed to update profile: $e',
       );
     }
   }
 
   void _showAvatarMessage() {
     final t = AppLocalizations.of(context);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(t.t('settings_avatar_coming_soon'))),
+    AppToast.showInfo(
+      context,
+      t.t('settings_avatar_coming_soon'),
     );
   }
 

@@ -88,9 +88,7 @@ class _HomeTabState extends State<HomeTab> {
   }
 
   void _showMessage(String message) {
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(message)));
+    AppToast.showError(context, message);
   }
 
   Future<void> _loadCatalog() async {

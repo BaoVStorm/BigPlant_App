@@ -4,6 +4,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/localization/locale_controller.dart';
 import '../../../../core/routing/app_router.dart';
+import '../../../../core/widgets/app_toast.dart';
 import '../../../auth/data/storage_service.dart';
 import '../../../auth/domain/auth_service.dart';
 import 'edit_user_screen.dart';
@@ -96,8 +97,9 @@ class _SettingsTabState extends State<SettingsTab> {
 
   Future<void> _openHelp() async {
     final t = AppLocalizations.of(context);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(t.t('settings_help_coming_soon'))),
+    AppToast.showInfo(
+      context,
+      t.t('settings_help_coming_soon'),
     );
   }
 

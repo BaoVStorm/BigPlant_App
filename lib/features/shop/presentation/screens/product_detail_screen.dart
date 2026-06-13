@@ -92,9 +92,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   }
 
   void _showActionMessage(String message) {
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(message)));
+    AppToast.showError(context, message);
   }
 
   Future<void> _handleAddToCart() async {

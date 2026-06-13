@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/localization/app_localizations.dart';
+import '../../../../core/widgets/app_toast.dart';
 import '../../data/ai_chat_repository.dart';
 import '../../domain/models/chat_message.dart';
 import '../widgets/chat_composer.dart';
@@ -98,8 +99,9 @@ class _AiChatTabState extends State<AiChatTab> {
     } catch (error) {
       if (!mounted) return;
       setState(() => _loading = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Không tạo được phiên chat mới: $error')),
+      AppToast.showError(
+        context,
+        'Không tạo được phiên chat mới: $error',
       );
     }
   }
@@ -209,8 +211,9 @@ class _AiChatTabState extends State<AiChatTab> {
     } catch (error) {
       if (!mounted) return;
       setState(() => _loading = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Không tạo được phiên chat mới: $error')),
+      AppToast.showError(
+        context,
+        'Không tạo được phiên chat mới: $error',
       );
     }
   }
@@ -262,8 +265,9 @@ class _AiChatTabState extends State<AiChatTab> {
     } catch (error) {
       if (!mounted) return;
       setState(() => _loading = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Không tải được phiên chat: $error')),
+      AppToast.showError(
+        context,
+        'Không tải được phiên chat: $error',
       );
     }
   }

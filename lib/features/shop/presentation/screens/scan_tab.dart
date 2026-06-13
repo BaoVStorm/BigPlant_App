@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/localization/app_localizations.dart';
+import '../../../../core/widgets/app_toast.dart';
 import '../../../scan/domain/scan_service.dart';
 import '../../../scan/presentation/screens/camera_realtime_scan_screen.dart';
 import '../../../scan/presentation/screens/scan_result_screen.dart';
@@ -59,9 +60,10 @@ class _ScanTabState extends State<ScanTab> {
       if (mounted) setState(() => _previewBytes = null);
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
+      AppToast.showError(
         context,
-      ).showSnackBar(SnackBar(content: Text(e.toString())));
+        e.toString(),
+      );
     } finally {
       if (mounted) {
         setState(() => _loading = false);
