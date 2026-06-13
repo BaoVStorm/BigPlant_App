@@ -9,6 +9,7 @@ class StorageService {
   static const _phoneNumberKey = 'phone_number';
   static const _dateOfBirthKey = 'date_of_birth';
   static const _genderKey = 'gender';
+  static const _photoUrlKey = 'photo_url';
   static const _languageKey = 'language_code';
   static const _scanLocalModelKey = 'scan.local.selected_model';
   static const _notifyDealsKey = 'settings.notify_deals';
@@ -30,6 +31,7 @@ class StorageService {
     String? phoneNumber,
     String? dateOfBirth,
     String? gender,
+    String? photoUrl,
   }) async {
     final prefs = await SharedPreferences.getInstance();
     if (userName != null) {
@@ -49,6 +51,9 @@ class StorageService {
     }
     if (gender != null) {
       await prefs.setString(_genderKey, gender);
+    }
+    if (photoUrl != null) {
+      await prefs.setString(_photoUrlKey, photoUrl);
     }
   }
 
@@ -92,6 +97,11 @@ class StorageService {
     return prefs.getString(_genderKey);
   }
 
+  static Future<String?> getPhotoUrl() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_photoUrlKey);
+  }
+
   static Future<void> clearAuth() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_tokenKey);
@@ -102,6 +112,7 @@ class StorageService {
     await prefs.remove(_phoneNumberKey);
     await prefs.remove(_dateOfBirthKey);
     await prefs.remove(_genderKey);
+    await prefs.remove(_photoUrlKey);
   }
 
   static Future<void> setLanguageCode(String code) async {

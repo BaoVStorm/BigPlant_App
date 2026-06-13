@@ -4,6 +4,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/localization/locale_controller.dart';
 import '../../../../core/routing/app_router.dart';
+import '../../../../core/widgets/app_network_image.dart';
 import '../../../../core/widgets/app_toast.dart';
 import '../../../auth/data/storage_service.dart';
 import '../../../auth/domain/auth_service.dart';
@@ -28,6 +29,7 @@ class _SettingsTabState extends State<SettingsTab> {
   String _phoneNumber = '';
   String _dateOfBirth = '';
   String _gender = 'unknown';
+  String? _photoUrl;
 
   @override
   void initState() {
@@ -70,6 +72,7 @@ class _SettingsTabState extends State<SettingsTab> {
           phoneNumber: _phoneNumber,
           dateOfBirth: _dateOfBirth,
           gender: _gender,
+          photoUrl: _photoUrl,
         ),
       ),
     );
@@ -153,6 +156,7 @@ class _SettingsTabState extends State<SettingsTab> {
               displayName: _displayName,
               email: _displayEmail,
               initials: _initials(),
+              photoUrl: _photoUrl,
               onTap: _openEditUser,
             ),
             const SizedBox(height: 40),
@@ -238,12 +242,14 @@ class _SettingsProfileCard extends StatelessWidget {
     required this.email,
     required this.initials,
     required this.onTap,
+    this.photoUrl,
   });
 
   final String displayName;
   final String email;
   final String initials;
   final VoidCallback onTap;
+  final String? photoUrl;
 
   @override
   Widget build(BuildContext context) {
@@ -280,12 +286,16 @@ class _SettingsProfileCard extends StatelessWidget {
                   border: Border.all(color: AppColors.surfaceContainerHigh, width: 2),
                 ),
                 alignment: Alignment.center,
-                child: Text(
-                  initials,
-                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    color: AppColors.primary,
-                    fontSize: 20,
-                  ),
+                child: ClipOval(
+                  child: (photoUrl != null && photoUrl!.isNotEmpty)
+                    ? AppNetworkImage(url: photoUrl!, fit: BoxFit.cover, width: 64, height: 64)
+                    : Text(
+                        initials,
+                        style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                          color: AppColors.primary,
+                          fontSize: 20,
+                        ),
+                      ),
                 ),
               ),
               const SizedBox(width: 16),

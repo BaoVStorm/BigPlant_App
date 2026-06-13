@@ -118,6 +118,7 @@ class AuthService {
             phoneNumber: user['phone_number']?.toString(),
             dateOfBirth: user['date_of_birth']?.toString(),
             gender: user['gender']?.toString(),
+            photoUrl: user['photo_url']?.toString(),
           );
         }
         return true;
@@ -138,6 +139,7 @@ class AuthService {
     String? phoneNumber,
     String? dateOfBirth,
     String? gender,
+    String? photoBase64,
   }) async {
     final token = await StorageService.getToken();
     if (token == null || token.isEmpty) {
@@ -150,6 +152,7 @@ class AuthService {
       phoneNumber: phoneNumber,
       dateOfBirth: dateOfBirth,
       gender: gender,
+      photoBase64: photoBase64,
     );
 
     await _persistAuthResponse(response);

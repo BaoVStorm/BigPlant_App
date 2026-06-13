@@ -98,6 +98,7 @@ class AuthApi {
     String? phoneNumber,
     String? dateOfBirth,
     String? gender,
+    String? photoBase64,
   }) {
     return _client.put(
       '${ApiConstants.baseUrl}api/auth/update-profile',
@@ -107,6 +108,7 @@ class AuthApi {
         if (phoneNumber != null) 'phone_number': phoneNumber,
         if (dateOfBirth != null) 'date_of_birth': dateOfBirth,
         if (gender != null) 'gender': gender,
+        if (photoBase64 != null) 'photo_base64': photoBase64,
       },
     );
   }

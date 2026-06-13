@@ -1,9 +1,15 @@
+import 'dart:convert';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_globals.dart';
 import '../../../../core/localization/app_localizations.dart';
+import '../../../../core/widgets/app_network_image.dart';
 import '../../../../core/widgets/app_toast.dart';
 import '../../../auth/domain/auth_service.dart';
+
 
 class EditUserScreen extends StatefulWidget {
   const EditUserScreen({
@@ -13,6 +19,7 @@ class EditUserScreen extends StatefulWidget {
     required this.phoneNumber,
     required this.dateOfBirth,
     required this.gender,
+    this.photoUrl,
     super.key,
   });
 
@@ -22,6 +29,7 @@ class EditUserScreen extends StatefulWidget {
   final String phoneNumber;
   final String dateOfBirth;
   final String gender;
+  final String? photoUrl;
 
   @override
   State<EditUserScreen> createState() => _EditUserScreenState();
@@ -34,6 +42,18 @@ class _EditUserScreenState extends State<EditUserScreen> {
   DateTime? _selectedDate;
   late String _gender;
   bool _saving = false;
+  
+  Uint8List? _avatarBytes;
+  String? _base64Avatar;
+
+  bool get _isDirty {
+    if (_fullNameCtrl.text.trim() != widget.fullName.trim()) return true;
+    if (_phoneCtrl.text.trim() != widget.phoneNumber.trim()) return true;
+    if (_formatDate(_selectedDate) != widget.dateOfBirth) return true;
+    if (_gender != (widget.gender.isEmpty || widget.gender == 'unknown' ? 'other' : widget.gender)) return true;
+    if (_avatarBytes != null) return true;
+    return false;
+  }
 
   @override
   void initState() {
@@ -126,6 +146,7 @@ class _EditUserScreenState extends State<EditUserScreen> {
         phoneNumber: phone,
         dateOfBirth: _formatDate(_selectedDate),
         gender: _gender,
+        photoBase64: _base64Avatar,
       );
       if (!mounted) return;
       setState(() => _saving = false);
@@ -144,11 +165,50 @@ class _EditUserScreenState extends State<EditUserScreen> {
     }
   }
 
-  void _showAvatarMessage() {
+
+  Future<void> _pickAvatar() async {
+    try {
+      final ImagePicker picker = ImagePicker();
+      final XFile? image = await picker.pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 800,
+        imageQuality: 80,
+      );
+      if (image == null) return;
+
+      final bytes = await image.readAsBytes();
+      final base64String = base64Encode(bytes);
+      
+      setState(() {
+        _avatarBytes = bytes;
+        _base64Avatar = 'data:image/jpeg;base64,$base64String';
+      });
+    } catch (e) {
+      if (!mounted) return;
+      AppToast.showError(context, 'Failed to pick image: $e');
+    }
+  }
+
+
+
+  Future<bool?> _showDiscardDialog() {
     final t = AppLocalizations.of(context);
-    AppToast.showInfo(
-      context,
-      t.t('settings_avatar_coming_soon'),
+    return showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Discard changes?', style: TextStyle(color: AppColors.primary)),
+        content: Text('You have unsaved changes. Are you sure you want to discard them?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text('Cancel', style: TextStyle(color: AppColors.outline)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text('Discard', style: TextStyle(color: AppColors.error)),
+          ),
+        ],
+      ),
     );
   }
 
@@ -157,7 +217,16 @@ class _EditUserScreenState extends State<EditUserScreen> {
     final t = AppLocalizations.of(context);
     final theme = Theme.of(context);
 
-    return Scaffold(
+    return PopScope(
+      canPop: !_isDirty,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop) return;
+        final shouldPop = await _showDiscardDialog();
+        if (shouldPop == true && mounted) {
+          Navigator.of(context).pop();
+        }
+      },
+      child: Scaffold(
       backgroundColor: AppColors.surface,
       appBar: AppBar(
         backgroundColor: AppColors.surface.withValues(alpha: 0.9),
@@ -203,12 +272,18 @@ class _EditUserScreenState extends State<EditUserScreen> {
                       ],
                     ),
                     alignment: Alignment.center,
-                    child: Text(
-                      _initials(),
-                      style: theme.textTheme.titleLarge?.copyWith(
-                        color: AppColors.primary,
-                        fontSize: 34,
-                      ),
+                    child: ClipOval(
+                      child: _avatarBytes != null
+                        ? Image.memory(_avatarBytes!, fit: BoxFit.cover)
+                        : (widget.photoUrl != null && widget.photoUrl!.isNotEmpty)
+                          ? AppNetworkImage(url: widget.photoUrl!, fit: BoxFit.cover)
+                          : Text(
+                              _initials(),
+                              style: theme.textTheme.titleLarge?.copyWith(
+                                color: AppColors.primary,
+                                fontSize: 34,
+                              ),
+                            ),
                     ),
                   ),
                   Positioned(
@@ -219,7 +294,7 @@ class _EditUserScreenState extends State<EditUserScreen> {
                       shape: const CircleBorder(),
                       child: InkWell(
                         customBorder: const CircleBorder(),
-                        onTap: _showAvatarMessage,
+                        onTap: _pickAvatar,
                         child: Container(
                           width: 40,
                           height: 40,
@@ -533,6 +608,28 @@ class _EditSectionCard extends StatelessWidget {
   final IconData icon;
   final Widget child;
 
+
+  Future<bool?> _showDiscardDialog() {
+    final t = AppLocalizations.of(context);
+    return showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Discard changes?', style: TextStyle(color: AppColors.primary)),
+        content: Text('You have unsaved changes. Are you sure you want to discard them?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text('Cancel', style: TextStyle(color: AppColors.outline)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text('Discard', style: TextStyle(color: AppColors.error)),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -587,6 +684,28 @@ class _ReadonlyField extends StatelessWidget {
   final String value;
   final Widget? trailing;
 
+
+  Future<bool?> _showDiscardDialog() {
+    final t = AppLocalizations.of(context);
+    return showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Discard changes?', style: TextStyle(color: AppColors.primary)),
+        content: Text('You have unsaved changes. Are you sure you want to discard them?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text('Cancel', style: TextStyle(color: AppColors.outline)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text('Discard', style: TextStyle(color: AppColors.error)),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -629,6 +748,28 @@ class _LabeledInput extends StatelessWidget {
   final IconData icon;
   final Widget child;
 
+
+  Future<bool?> _showDiscardDialog() {
+    final t = AppLocalizations.of(context);
+    return showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Discard changes?', style: TextStyle(color: AppColors.primary)),
+        content: Text('You have unsaved changes. Are you sure you want to discard them?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text('Cancel', style: TextStyle(color: AppColors.outline)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text('Discard', style: TextStyle(color: AppColors.error)),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -666,6 +807,28 @@ class _GenderOption {
 
 class _StaticSettingsBottomBar extends StatelessWidget {
   const _StaticSettingsBottomBar();
+
+
+  Future<bool?> _showDiscardDialog() {
+    final t = AppLocalizations.of(context);
+    return showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Discard changes?', style: TextStyle(color: AppColors.primary)),
+        content: Text('You have unsaved changes. Are you sure you want to discard them?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text('Cancel', style: TextStyle(color: AppColors.outline)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text('Discard', style: TextStyle(color: AppColors.error)),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -705,6 +868,28 @@ class _StaticNavItem extends StatelessWidget {
   final IconData icon;
   final String label;
   final bool selected;
+
+
+  Future<bool?> _showDiscardDialog() {
+    final t = AppLocalizations.of(context);
+    return showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Discard changes?', style: TextStyle(color: AppColors.primary)),
+        content: Text('You have unsaved changes. Are you sure you want to discard them?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text('Cancel', style: TextStyle(color: AppColors.outline)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text('Discard', style: TextStyle(color: AppColors.error)),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
