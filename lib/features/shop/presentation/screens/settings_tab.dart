@@ -288,7 +288,7 @@ class _SettingsProfileCard extends StatelessWidget {
                 alignment: Alignment.center,
                 child: ClipOval(
                   child: (photoUrl != null && photoUrl!.isNotEmpty)
-                    ? AppNetworkImage(url: photoUrl!, fit: BoxFit.cover, width: 64, height: 64)
+                    ? AppNetworkImage(imageUrl: photoUrl!, fit: BoxFit.cover, width: 64, height: 64)
                     : Text(
                         initials,
                         style: Theme.of(context).textTheme.headlineMedium?.copyWith(

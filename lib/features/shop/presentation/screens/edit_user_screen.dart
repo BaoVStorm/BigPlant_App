@@ -276,7 +276,7 @@ class _EditUserScreenState extends State<EditUserScreen> {
                       child: _avatarBytes != null
                         ? Image.memory(_avatarBytes!, fit: BoxFit.cover)
                         : (widget.photoUrl != null && widget.photoUrl!.isNotEmpty)
-                          ? AppNetworkImage(url: widget.photoUrl!, fit: BoxFit.cover)
+                          ? AppNetworkImage(imageUrl: widget.photoUrl!, fit: BoxFit.cover)
                           : Text(
                               _initials(),
                               style: theme.textTheme.titleLarge?.copyWith(
@@ -566,6 +566,7 @@ class _EditUserScreenState extends State<EditUserScreen> {
           ),
         ],
       ),
+    ),
     );
   }
 
@@ -597,6 +598,7 @@ class _EditUserScreenState extends State<EditUserScreen> {
   }
 }
 
+
 class _EditSectionCard extends StatelessWidget {
   const _EditSectionCard({
     required this.title,
@@ -607,28 +609,6 @@ class _EditSectionCard extends StatelessWidget {
   final String title;
   final IconData icon;
   final Widget child;
-
-
-  Future<bool?> _showDiscardDialog() {
-    final t = AppLocalizations.of(context);
-    return showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Discard changes?', style: TextStyle(color: AppColors.primary)),
-        content: Text('You have unsaved changes. Are you sure you want to discard them?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: Text('Cancel', style: TextStyle(color: AppColors.outline)),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: Text('Discard', style: TextStyle(color: AppColors.error)),
-          ),
-        ],
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -684,28 +664,6 @@ class _ReadonlyField extends StatelessWidget {
   final String value;
   final Widget? trailing;
 
-
-  Future<bool?> _showDiscardDialog() {
-    final t = AppLocalizations.of(context);
-    return showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Discard changes?', style: TextStyle(color: AppColors.primary)),
-        content: Text('You have unsaved changes. Are you sure you want to discard them?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: Text('Cancel', style: TextStyle(color: AppColors.outline)),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: Text('Discard', style: TextStyle(color: AppColors.error)),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -748,28 +706,6 @@ class _LabeledInput extends StatelessWidget {
   final IconData icon;
   final Widget child;
 
-
-  Future<bool?> _showDiscardDialog() {
-    final t = AppLocalizations.of(context);
-    return showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Discard changes?', style: TextStyle(color: AppColors.primary)),
-        content: Text('You have unsaved changes. Are you sure you want to discard them?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: Text('Cancel', style: TextStyle(color: AppColors.outline)),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: Text('Discard', style: TextStyle(color: AppColors.error)),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -807,28 +743,6 @@ class _GenderOption {
 
 class _StaticSettingsBottomBar extends StatelessWidget {
   const _StaticSettingsBottomBar();
-
-
-  Future<bool?> _showDiscardDialog() {
-    final t = AppLocalizations.of(context);
-    return showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Discard changes?', style: TextStyle(color: AppColors.primary)),
-        content: Text('You have unsaved changes. Are you sure you want to discard them?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: Text('Cancel', style: TextStyle(color: AppColors.outline)),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: Text('Discard', style: TextStyle(color: AppColors.error)),
-          ),
-        ],
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -868,28 +782,6 @@ class _StaticNavItem extends StatelessWidget {
   final IconData icon;
   final String label;
   final bool selected;
-
-
-  Future<bool?> _showDiscardDialog() {
-    final t = AppLocalizations.of(context);
-    return showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Discard changes?', style: TextStyle(color: AppColors.primary)),
-        content: Text('You have unsaved changes. Are you sure you want to discard them?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: Text('Cancel', style: TextStyle(color: AppColors.outline)),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: Text('Discard', style: TextStyle(color: AppColors.error)),
-          ),
-        ],
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
