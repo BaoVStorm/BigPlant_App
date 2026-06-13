@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/widgets/app_network_image.dart';
+import '../../../../core/widgets/app_toast.dart';
 import '../../../auth/data/storage_service.dart';
 import '../../../scan/presentation/screens/camera_realtime_scan_screen.dart';
 import '../../domain/models/shop_product.dart';
@@ -497,7 +498,8 @@ class _HomeTabState extends State<HomeTab> {
                           variantId: product.defaultVariant.id.toString(),
                         );
                         if (!mounted) return;
-                        _showMessage(
+                        AppToast.showSuccess(
+                          context,
                           t
                               .t('product_added_to_cart')
                               .replaceFirst('{name}', product.name),

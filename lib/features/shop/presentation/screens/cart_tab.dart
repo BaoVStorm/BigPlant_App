@@ -251,11 +251,37 @@ class _CartTabState extends State<CartTab> {
                             ),
                             if (_breakdown.discount > 0) ...[
                               const SizedBox(height: 12),
-                              _SummaryRow(
-                                label: t.t('order_discount_label'),
-                                value: '-${_formatCurrency(_breakdown.discount)}',
-                                highlight: true,
-                              ),
+                              if (_breakdown.discount > _breakdown.subtotal && _breakdown.subtotal > 0)
+                                _SummaryRow(
+                                  label: t.t('order_discount_label'),
+                                  value: '',
+                                  customValue: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        '-${_formatCurrency(_breakdown.discount)}',
+                                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                              color: AppColors.onSurfaceVariant,
+                                              decoration: TextDecoration.lineThrough,
+                                            ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        '-${_formatCurrency(_breakdown.subtotal)}',
+                                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                              color: AppColors.secondary,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                      ),
+                                    ],
+                                  ),
+                                )
+                              else
+                                _SummaryRow(
+                                  label: t.t('order_discount_label'),
+                                  value: '-${_formatCurrency(_breakdown.discount)}',
+                                  highlight: true,
+                                ),
                             ],
                             const SizedBox(height: 16),
                             const Divider(
@@ -509,12 +535,14 @@ class _SummaryRow extends StatelessWidget {
   const _SummaryRow({
     required this.label,
     required this.value,
+    this.customValue,
     this.highlight = false,
     this.total = false,
   });
 
   final String label;
   final String value;
+  final Widget? customValue;
   final bool highlight;
   final bool total;
 
@@ -540,20 +568,22 @@ class _SummaryRow extends StatelessWidget {
             fontWeight: highlight ? FontWeight.w700 : FontWeight.w500,
           );
 
+    final widgetValue = customValue ?? Text(value, style: valueStyle);
+
     if (total) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(label, style: labelStyle),
           const SizedBox(height: 6),
-          Text(value, style: valueStyle),
+          widgetValue,
         ],
       );
     }
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [Text(label, style: labelStyle), Text(value, style: valueStyle)],
+      children: [Text(label, style: labelStyle), widgetValue],
     );
   }
 }

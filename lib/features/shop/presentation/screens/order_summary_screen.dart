@@ -153,11 +153,37 @@ class OrderSummaryScreen extends StatelessWidget {
                 const SizedBox(height: 10),
                 _MoneyRow(label: t.t('order_shipping_fee_label'), value: _formatCurrency(breakdown.shippingFee)),
                 const SizedBox(height: 10),
-                _MoneyRow(
-                  label: t.t('order_discount_label'),
-                  value: '-${_formatCurrency(breakdown.discount)}',
-                  highlight: true,
-                ),
+                if (breakdown.discount > breakdown.subtotal && breakdown.subtotal > 0)
+                  _MoneyRow(
+                    label: t.t('order_discount_label'),
+                    value: '',
+                    customValue: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          '-${_formatCurrency(breakdown.discount)}',
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                color: AppColors.onSurfaceVariant,
+                                decoration: TextDecoration.lineThrough,
+                              ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          '-${_formatCurrency(breakdown.subtotal)}',
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                color: AppColors.secondary,
+                                fontWeight: FontWeight.w600,
+                              ),
+                        ),
+                      ],
+                    ),
+                  )
+                else
+                  _MoneyRow(
+                    label: t.t('order_discount_label'),
+                    value: '-${_formatCurrency(breakdown.discount)}',
+                    highlight: true,
+                  ),
                 const SizedBox(height: 16),
                 const Divider(height: 1, color: AppColors.surfaceContainerHighest),
                 const SizedBox(height: 16),
@@ -385,12 +411,14 @@ class _MoneyRow extends StatelessWidget {
   const _MoneyRow({
     required this.label,
     required this.value,
+    this.customValue,
     this.highlight = false,
     this.total = false,
   });
 
   final String label;
   final String value;
+  final Widget? customValue;
   final bool highlight;
   final bool total;
 
@@ -419,9 +447,11 @@ class _MoneyRow extends StatelessWidget {
             fontWeight: highlight ? FontWeight.w600 : FontWeight.w500,
           );
 
+    final widgetValue = customValue ?? Text(value, style: valueStyle);
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [Text(label, style: labelStyle), Text(value, style: valueStyle)],
+      children: [Text(label, style: labelStyle), widgetValue],
     );
   }
 }

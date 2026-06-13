@@ -77,5 +77,8 @@ class OrderBreakdown {
   final double shippingFee;
   final double discount;
 
-  double get total => subtotal + shippingFee - discount;
+  double get total {
+    final effectiveDiscount = discount > subtotal ? subtotal : discount;
+    return subtotal + shippingFee - effectiveDiscount;
+  }
 }

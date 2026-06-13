@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/widgets/app_network_image.dart';
+import '../../../../core/widgets/app_toast.dart';
 import '../../domain/models/shop_product.dart';
 import '../../domain/shop_service.dart';
 
@@ -105,7 +106,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         variantId: _selectedVariant.id.toString(),
       );
       if (!mounted) return;
-      _showActionMessage(
+      AppToast.showSuccess(
+        context,
         t.t('product_added_to_cart').replaceFirst('{name}', _product.name),
       );
     } catch (e) {
