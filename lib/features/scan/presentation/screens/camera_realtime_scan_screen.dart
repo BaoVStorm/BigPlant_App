@@ -696,7 +696,7 @@ class _CameraRealtimeScanScreenState extends State<CameraRealtimeScanScreen> {
                 _CaptureSummaryCard(
                   icon: Icons.timer,
                   label: t.t('scan_latency_label'),
-                  value: '$_lastInferLatencyMs ms',
+                  value: '${(_lastInferLatencyMs / 1000).toStringAsFixed(2)} s',
                 ),
                 const SizedBox(height: 16),
                 _CaptureSummaryCard(
