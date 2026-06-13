@@ -25,6 +25,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   bool _loadingDetails = false;
   String? _detailError;
   ShopProduct? _resolvedProduct;
+  bool _addingToCart = false;
 
   ShopProduct get _product => _resolvedProduct ?? widget.product;
 
@@ -93,6 +94,26 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  Future<void> _handleAddToCart() async {
+    if (_addingToCart) return;
+    final t = AppLocalizations.of(context);
+    setState(() => _addingToCart = true);
+    try {
+      await _shopService.addToCart(
+        variantId: _selectedVariant.id.toString(),
+      );
+      if (!mounted) return;
+      _showActionMessage(
+        t.t('product_added_to_cart').replaceFirst('{name}', _product.name),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      _showActionMessage('Failed to add to cart: $e');
+    } finally {
+      if (mounted) setState(() => _addingToCart = false);
+    }
   }
 
   String _storyHeadline(AppLocalizations t) {
@@ -471,11 +492,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             children: [
               Expanded(
                 child: OutlinedButton.icon(
-                  onPressed: () => _showActionMessage(
-                    t
-                        .t('product_added_to_cart')
-                        .replaceFirst('{name}', _product.name),
-                  ),
+                  onPressed: _addingToCart ? null : _handleAddToCart,
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppColors.primary,
                     minimumSize: const Size(double.infinity, 54),
@@ -484,7 +501,16 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       borderRadius: BorderRadius.circular(16),
                     ),
                   ),
-                  icon: const Icon(Icons.shopping_bag),
+                  icon: _addingToCart
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: AppColors.primary,
+                          ),
+                        )
+                      : const Icon(Icons.shopping_bag),
                   label: Text(t.t('product_add_to_cart')),
                 ),
               ),

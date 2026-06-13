@@ -2,11 +2,14 @@ import 'shop_product.dart';
 
 class CartLineItem {
   const CartLineItem({
+    this.cartItemId,
     required this.product,
     required this.variant,
     required this.quantity,
   });
 
+  /// Server-side cart_item _id. Null for locally-created items not yet synced.
+  final String? cartItemId;
   final ShopProduct product;
   final ProductVariant variant;
   final int quantity;
@@ -15,11 +18,13 @@ class CartLineItem {
   double get lineCompareSubtotal => (variant.compareAtPrice ?? variant.price) * quantity;
 
   CartLineItem copyWith({
+    String? cartItemId,
     ShopProduct? product,
     ProductVariant? variant,
     int? quantity,
   }) {
     return CartLineItem(
+      cartItemId: cartItemId ?? this.cartItemId,
       product: product ?? this.product,
       variant: variant ?? this.variant,
       quantity: quantity ?? this.quantity,

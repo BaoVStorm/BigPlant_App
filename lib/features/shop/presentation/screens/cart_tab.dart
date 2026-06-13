@@ -4,8 +4,8 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/widgets/app_network_image.dart';
 import '../../../auth/data/storage_service.dart';
-import '../../domain/local_cart_session.dart';
 import '../../domain/models/cart_checkout.dart';
+import '../../domain/shop_service.dart';
 import 'order_summary_screen.dart';
 
 class CartTab extends StatefulWidget {
@@ -16,14 +16,23 @@ class CartTab extends StatefulWidget {
 }
 
 class _CartTabState extends State<CartTab> {
-  late List<CartLineItem> _items;
+  final ShopService _shopService = ShopService();
+
+  List<CartLineItem> _items = const [];
+  OrderBreakdown _breakdown = const OrderBreakdown(
+    subtotal: 0,
+    shippingFee: 0,
+    discount: 0,
+  );
   String _fullName = '';
+  bool _loading = true;
+  String? _error;
 
   @override
   void initState() {
     super.initState();
-    _items = LocalCartSession.initialItems();
     _loadProfile();
+    _loadCart();
   }
 
   Future<void> _loadProfile() async {
@@ -32,20 +41,73 @@ class _CartTabState extends State<CartTab> {
     setState(() => _fullName = fullName);
   }
 
-  void _updateQuantity(int index, int delta) {
-    final current = _items[index];
-    final nextQuantity = current.quantity + delta;
-
+  Future<void> _loadCart() async {
     setState(() {
-      if (nextQuantity <= 0) {
-        _items.removeAt(index);
-        return;
-      }
-      _items[index] = current.copyWith(quantity: nextQuantity);
+      _loading = true;
+      _error = null;
     });
+
+    try {
+      final cartData = await _shopService.fetchCart();
+      if (!mounted) return;
+      setState(() {
+        _items = cartData.items;
+        _breakdown = cartData.breakdown;
+        _loading = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _loading = false;
+        _error = e.toString();
+      });
+    }
   }
 
-  OrderBreakdown get _breakdown => LocalCartSession.breakdownFor(_items);
+  Future<void> _updateQuantity(int index, int delta) async {
+    final current = _items[index];
+    final nextQuantity = current.quantity + delta;
+    final itemId = current.cartItemId;
+
+    if (itemId == null || itemId.isEmpty) return;
+
+    if (nextQuantity <= 0) {
+      // Optimistic removal
+      setState(() {
+        _items = List<CartLineItem>.from(_items)..removeAt(index);
+      });
+      try {
+        await _shopService.removeCartItem(itemId);
+        await _loadCart();
+      } catch (e) {
+        if (!mounted) return;
+        _showMessage('Failed to remove item: $e');
+        await _loadCart();
+      }
+      return;
+    }
+
+    // Optimistic update
+    setState(() {
+      final updated = current.copyWith(quantity: nextQuantity);
+      _items = List<CartLineItem>.from(_items)..[index] = updated;
+    });
+
+    try {
+      await _shopService.updateCartItem(itemId: itemId, quantity: nextQuantity);
+      await _loadCart();
+    } catch (e) {
+      if (!mounted) return;
+      _showMessage('Failed to update quantity: $e');
+      await _loadCart();
+    }
+  }
+
+  void _showMessage(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
+  }
 
   String _formatCurrency(double value) {
     final text = value.toStringAsFixed(0);
@@ -64,9 +126,21 @@ class _CartTabState extends State<CartTab> {
       MaterialPageRoute(
         builder: (_) => OrderSummaryScreen(
           items: List<CartLineItem>.from(_items),
-          address: LocalCartSession.defaultAddress(),
-          deliveryMethod: LocalCartSession.defaultDeliveryMethod(),
-          paymentMethod: LocalCartSession.defaultPaymentMethod(),
+          address: const CheckoutAddress(
+            fullName: 'Nguyễn Văn A',
+            phoneNumber: '090 123 4567',
+            addressLine:
+                '123 Đường Cây Xanh, Phường Quang Hợp, Quận Sinh Thái, TP. Hồ Chí Minh',
+          ),
+          deliveryMethod: const DeliveryMethod(
+            title: 'Giao hàng tiêu chuẩn',
+            subtitle: 'Dự kiến giao: 2-3 ngày',
+            fee: 50000,
+          ),
+          paymentMethod: const PaymentMethodOption(
+            title: 'Thanh toán khi nhận hàng (COD)',
+            subtitle: 'Thanh toán tiền mặt cho shipper',
+          ),
           breakdown: _breakdown,
         ),
       ),
@@ -87,114 +161,137 @@ class _CartTabState extends State<CartTab> {
     return DecoratedBox(
       decoration: const BoxDecoration(color: AppColors.surface),
       child: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(24, 16, 24, 120),
-          children: [
-            Text(
-              t.t('cart_title'),
-              style: theme.textTheme.headlineMedium?.copyWith(
-                color: AppColors.primary,
-                fontSize: 28,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              t
-                  .t('cart_selected_items')
-                  .replaceFirst('{count}', '${_items.length}')
-                  .replaceFirst('{name}', _displayName),
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: AppColors.onSurfaceVariant,
-              ),
-            ),
-            const SizedBox(height: 24),
-            if (_items.isEmpty)
-              _EmptyCartCard(
-                title: t.t('cart_empty_title'),
-                body: t.t('cart_empty_body'),
+        child: _loading
+            ? const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(48),
+                  child: CircularProgressIndicator(),
+                ),
               )
-            else ...[
-              for (var i = 0; i < _items.length; i++) ...[
-                _CartItemCard(
-                  item: _items[i],
-                  priceFormatter: _formatCurrency,
-                  onIncrease: () => _updateQuantity(i, 1),
-                  onDecrease: () => _updateQuantity(i, -1),
-                ),
-                if (i != _items.length - 1) const SizedBox(height: 16),
-              ],
-              const SizedBox(height: 24),
-              Container(
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  color: AppColors.surfaceContainerLowest,
-                  borderRadius: BorderRadius.circular(24),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.primary.withValues(alpha: 0.04),
-                      blurRadius: 20,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Column(
+            : RefreshIndicator(
+                onRefresh: _loadCart,
+                child: ListView(
+                  padding: const EdgeInsets.fromLTRB(24, 16, 24, 120),
                   children: [
-                    _SummaryRow(
-                      label: t.t('order_subtotal_label'),
-                      value: _formatCurrency(_breakdown.subtotal),
+                    Text(
+                      t.t('cart_title'),
+                      style: theme.textTheme.headlineMedium?.copyWith(
+                        color: AppColors.primary,
+                        fontSize: 28,
+                      ),
                     ),
-                    const SizedBox(height: 12),
-                    _SummaryRow(
-                      label: t.t('order_shipping_fee_label'),
-                      value: _formatCurrency(_breakdown.shippingFee),
+                    const SizedBox(height: 8),
+                    Text(
+                      t
+                          .t('cart_selected_items')
+                          .replaceFirst('{count}', '${_items.length}')
+                          .replaceFirst('{name}', _displayName),
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: AppColors.onSurfaceVariant,
+                      ),
                     ),
-                    if (_breakdown.discount > 0) ...[
-                      const SizedBox(height: 12),
-                      _SummaryRow(
-                        label: t.t('order_discount_label'),
-                        value: '-${_formatCurrency(_breakdown.discount)}',
-                        highlight: true,
+                    const SizedBox(height: 24),
+                    if (_error != null) ...[
+                      _EmptyCartCard(
+                        title: 'Error',
+                        body: _error!,
+                      ),
+                      const SizedBox(height: 16),
+                      Center(
+                        child: TextButton.icon(
+                          onPressed: _loadCart,
+                          icon: const Icon(Icons.refresh),
+                          label: const Text('Retry'),
+                        ),
+                      ),
+                    ] else if (_items.isEmpty)
+                      _EmptyCartCard(
+                        title: t.t('cart_empty_title'),
+                        body: t.t('cart_empty_body'),
+                      )
+                    else ...[
+                      for (var i = 0; i < _items.length; i++) ...[
+                        _CartItemCard(
+                          item: _items[i],
+                          priceFormatter: _formatCurrency,
+                          onIncrease: () => _updateQuantity(i, 1),
+                          onDecrease: () => _updateQuantity(i, -1),
+                        ),
+                        if (i != _items.length - 1) const SizedBox(height: 16),
+                      ],
+                      const SizedBox(height: 24),
+                      Container(
+                        padding: const EdgeInsets.all(24),
+                        decoration: BoxDecoration(
+                          color: AppColors.surfaceContainerLowest,
+                          borderRadius: BorderRadius.circular(24),
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.primary.withValues(alpha: 0.04),
+                              blurRadius: 20,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          children: [
+                            _SummaryRow(
+                              label: t.t('order_subtotal_label'),
+                              value: _formatCurrency(_breakdown.subtotal),
+                            ),
+                            const SizedBox(height: 12),
+                            _SummaryRow(
+                              label: t.t('order_shipping_fee_label'),
+                              value: _formatCurrency(_breakdown.shippingFee),
+                            ),
+                            if (_breakdown.discount > 0) ...[
+                              const SizedBox(height: 12),
+                              _SummaryRow(
+                                label: t.t('order_discount_label'),
+                                value: '-${_formatCurrency(_breakdown.discount)}',
+                                highlight: true,
+                              ),
+                            ],
+                            const SizedBox(height: 16),
+                            const Divider(
+                              height: 1,
+                              color: AppColors.surfaceContainerHigh,
+                            ),
+                            const SizedBox(height: 16),
+                            _SummaryRow(
+                              label: t.t('order_total_label'),
+                              value: _formatCurrency(_breakdown.total),
+                              total: true,
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      ElevatedButton(
+                        onPressed: _openCheckout,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          foregroundColor: AppColors.onPrimary,
+                          minimumSize: const Size(double.infinity, 56),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          elevation: 0,
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(t.t('checkout_now')),
+                            const SizedBox(width: 8),
+                            const Icon(Icons.arrow_forward, size: 18),
+                          ],
+                        ),
                       ),
                     ],
-                    const SizedBox(height: 16),
-                    const Divider(
-                      height: 1,
-                      color: AppColors.surfaceContainerHigh,
-                    ),
-                    const SizedBox(height: 16),
-                    _SummaryRow(
-                      label: t.t('order_total_label'),
-                      value: _formatCurrency(_breakdown.total),
-                      total: true,
-                    ),
                   ],
                 ),
               ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _openCheckout,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: AppColors.onPrimary,
-                  minimumSize: const Size(double.infinity, 56),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  elevation: 0,
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(t.t('checkout_now')),
-                    const SizedBox(width: 8),
-                    const Icon(Icons.arrow_forward, size: 18),
-                  ],
-                ),
-              ),
-            ],
-          ],
-        ),
       ),
     );
   }

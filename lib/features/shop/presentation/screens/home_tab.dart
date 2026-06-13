@@ -491,11 +491,22 @@ class _HomeTabState extends State<HomeTab> {
                         builder: (_) => ProductDetailScreen(product: product),
                       ),
                     ),
-                    onAdd: () => _showMessage(
-                      t
-                          .t('product_added_to_cart')
-                          .replaceFirst('{name}', product.name),
-                    ),
+                    onAdd: () async {
+                      try {
+                        await _shopService.addToCart(
+                          variantId: product.defaultVariant.id.toString(),
+                        );
+                        if (!mounted) return;
+                        _showMessage(
+                          t
+                              .t('product_added_to_cart')
+                              .replaceFirst('{name}', product.name),
+                        );
+                      } catch (e) {
+                        if (!mounted) return;
+                        _showMessage('Failed to add to cart: $e');
+                      }
+                    },
                   );
                 },
               ),
