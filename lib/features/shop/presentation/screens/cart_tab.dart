@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../../../core/constants/app_colors.dart';
@@ -27,12 +29,22 @@ class _CartTabState extends State<CartTab> {
   String _fullName = '';
   bool _loading = true;
   String? _error;
+  StreamSubscription<void>? _cartSub;
 
   @override
   void initState() {
     super.initState();
     _loadProfile();
     _loadCart();
+    _cartSub = ShopService.cartUpdates.stream.listen((_) {
+      if (mounted) _loadCart();
+    });
+  }
+
+  @override
+  void dispose() {
+    _cartSub?.cancel();
+    super.dispose();
   }
 
   Future<void> _loadProfile() async {
@@ -110,14 +122,7 @@ class _CartTabState extends State<CartTab> {
   }
 
   String _formatCurrency(double value) {
-    final text = value.toStringAsFixed(0);
-    final chars = text.split('').reversed.toList();
-    final buffer = StringBuffer();
-    for (var i = 0; i < chars.length; i++) {
-      if (i > 0 && i % 3 == 0) buffer.write('.');
-      buffer.write(chars[i]);
-    }
-    return '${buffer.toString().split('').reversed.join()}đ';
+    return '\$${value.toStringAsFixed(2)}';
   }
 
   void _openCheckout() {

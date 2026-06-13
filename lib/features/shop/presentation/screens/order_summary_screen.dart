@@ -203,14 +203,7 @@ class OrderSummaryScreen extends StatelessWidget {
   }
 
   String _formatCurrency(double value) {
-    final text = value.toStringAsFixed(0);
-    final chars = text.split('').reversed.toList();
-    final buffer = StringBuffer();
-    for (var i = 0; i < chars.length; i++) {
-      if (i > 0 && i % 3 == 0) buffer.write('.');
-      buffer.write(chars[i]);
-    }
-    return '${buffer.toString().split('').reversed.join()}đ';
+    return '\$${value.toStringAsFixed(2)}';
   }
 }
 
@@ -326,14 +319,7 @@ class _OrderItemRow extends StatelessWidget {
   }
 
   String _formatCurrency(double value) {
-    final text = value.toStringAsFixed(0);
-    final chars = text.split('').reversed.toList();
-    final buffer = StringBuffer();
-    for (var i = 0; i < chars.length; i++) {
-      if (i > 0 && i % 3 == 0) buffer.write('.');
-      buffer.write(chars[i]);
-    }
-    return '${buffer.toString().split('').reversed.join()}đ';
+    return '\$${value.toStringAsFixed(2)}';
   }
 }
 

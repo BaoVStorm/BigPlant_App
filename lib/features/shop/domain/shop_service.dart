@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import '../../../core/network/api_client.dart';
 import '../data/shop_api.dart';
 import 'models/cart_checkout.dart';
@@ -7,6 +9,7 @@ class ShopService {
   ShopService({ShopApi? api}) : _api = api ?? ShopApi(ApiClient());
 
   final ShopApi _api;
+  static final StreamController<void> cartUpdates = StreamController<void>.broadcast();
 
   // ── Product / Category ─────────────────────────────────────────────────
 
@@ -97,6 +100,7 @@ class ShopService {
     int quantity = 1,
   }) async {
     await _api.addCartItem(variantId: variantId, quantity: quantity);
+    cartUpdates.add(null);
   }
 
   Future<void> updateCartItem({
@@ -104,14 +108,17 @@ class ShopService {
     required int quantity,
   }) async {
     await _api.updateCartItem(itemId: itemId, quantity: quantity);
+    cartUpdates.add(null);
   }
 
   Future<void> removeCartItem(String itemId) async {
     await _api.removeCartItem(itemId);
+    cartUpdates.add(null);
   }
 
   Future<void> clearCart() async {
     await _api.clearCart();
+    cartUpdates.add(null);
   }
 }
 
