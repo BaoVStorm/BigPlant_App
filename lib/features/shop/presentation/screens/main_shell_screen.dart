@@ -52,6 +52,7 @@ class _MainShellScreenState extends State<MainShellScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF4F7F4),
       drawer: Drawer(
+        width: 240,
         backgroundColor: AppColors.surface,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -118,15 +119,21 @@ class _MainShellScreenState extends State<MainShellScreen> {
               top: false,
               child: Padding(
                 padding: const EdgeInsets.only(bottom: 8.0),
-                child: ListTile(
-                  leading: const Icon(Icons.help_outline, color: AppColors.outline),
-                  title: Text(t.t('settings_help_support'), style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.onSurface)),
-                  onTap: () {
-                    Navigator.pop(context);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(t.t('settings_help_coming_soon'))),
-                    );
-                  },
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Divider(height: 1),
+                    ListTile(
+                      leading: const Icon(Icons.help_outline, color: AppColors.outline),
+                      title: Text(t.t('settings_help_support'), style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.onSurface)),
+                      onTap: () {
+                        Navigator.pop(context);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(t.t('settings_help_coming_soon'))),
+                        );
+                      },
+                    ),
+                  ],
                 ),
               ),
             ),
