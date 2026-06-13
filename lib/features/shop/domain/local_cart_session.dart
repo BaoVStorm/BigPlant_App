@@ -50,7 +50,7 @@ class LocalCartSession {
   static OrderBreakdown breakdownFor(List<CartLineItem> items) {
     final subtotal = items.fold<double>(0, (sum, item) => sum + item.lineSubtotal);
     final shipping = 1.0;
-    final discount = items.length >= 2 ? 100000.0 : 0.0;
+    final discount = items.length >= 2 ? 10.0 : 0.0;
     return OrderBreakdown(
       subtotal: subtotal,
       shippingFee: shipping,
