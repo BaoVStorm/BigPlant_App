@@ -48,13 +48,20 @@ class LocalCartSession {
   }
 
   static OrderBreakdown breakdownFor(List<CartLineItem> items) {
-    final subtotal = items.fold<double>(0, (sum, item) => sum + item.lineSubtotal);
+    final subtotal = items.fold<double>(0.0, (sum, item) => sum + item.lineSubtotal);
+    final compareTotal = items.fold<double>(0.0, (sum, item) => sum + item.lineCompareSubtotal);
+    final originalDiscount = compareTotal > subtotal ? compareTotal - subtotal : 0.0;
+    
     final shipping = 1.0;
-    final discount = items.length >= 2 ? 10.0 : 0.0;
+    final discount = 0.0; // Do not mock discount locally
+    final total = subtotal + shipping - discount;
+
     return OrderBreakdown(
       subtotal: subtotal,
       shippingFee: shipping,
+      originalDiscount: originalDiscount,
       discount: discount,
+      total: total > 0 ? total : 0.0,
     );
   }
 }
