@@ -42,6 +42,7 @@ class _EditUserScreenState extends State<EditUserScreen> {
   DateTime? _selectedDate;
   late String _gender;
   bool _saving = false;
+  bool _forcePop = false;
   
   Uint8List? _avatarBytes;
   String? _base64Avatar;
@@ -49,7 +50,7 @@ class _EditUserScreenState extends State<EditUserScreen> {
   bool get _isDirty {
     if (_fullNameCtrl.text.trim() != widget.fullName.trim()) return true;
     if (_phoneCtrl.text.trim() != widget.phoneNumber.trim()) return true;
-    if (_formatDate(_selectedDate) != widget.dateOfBirth) return true;
+    if (_formatDate(_selectedDate) != _formatDate(_parseDate(widget.dateOfBirth))) return true;
     if (_gender != (widget.gender.isEmpty || widget.gender == 'unknown' ? 'other' : widget.gender)) return true;
     if (_avatarBytes != null) return true;
     return false;
@@ -62,6 +63,9 @@ class _EditUserScreenState extends State<EditUserScreen> {
     _phoneCtrl = TextEditingController(text: widget.phoneNumber);
     _gender = (widget.gender.isEmpty || widget.gender == 'unknown') ? 'other' : widget.gender;
     _selectedDate = _parseDate(widget.dateOfBirth);
+    
+    _fullNameCtrl.addListener(() => setState(() {}));
+    _phoneCtrl.addListener(() => setState(() {}));
   }
 
   @override
@@ -218,12 +222,15 @@ class _EditUserScreenState extends State<EditUserScreen> {
     final theme = Theme.of(context);
 
     return PopScope(
-      canPop: !_isDirty,
+      canPop: !_isDirty || _forcePop,
       onPopInvokedWithResult: (didPop, result) async {
         if (didPop) return;
         final shouldPop = await _showDiscardDialog();
         if (shouldPop == true && mounted) {
-          Navigator.of(context).pop();
+          setState(() => _forcePop = true);
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) Navigator.of(context).pop();
+          });
         }
       },
       child: Scaffold(
@@ -529,10 +536,12 @@ class _EditUserScreenState extends State<EditUserScreen> {
           ),
           const SizedBox(height: 24),
           ElevatedButton.icon(
-            onPressed: _saving ? null : _save,
+            onPressed: (!_isDirty || _saving) ? null : _save,
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primary,
               foregroundColor: AppColors.onPrimary,
+              disabledBackgroundColor: AppColors.primary.withValues(alpha: 0.45),
+              disabledForegroundColor: AppColors.onPrimary.withValues(alpha: 0.8),
               minimumSize: const Size(double.infinity, 56),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
@@ -553,7 +562,7 @@ class _EditUserScreenState extends State<EditUserScreen> {
           ),
           const SizedBox(height: 12),
           OutlinedButton(
-            onPressed: _saving ? null : () => Navigator.of(context).pop(false),
+            onPressed: _saving ? null : () => Navigator.of(context).maybePop(false),
             style: OutlinedButton.styleFrom(
               foregroundColor: AppColors.primary,
               minimumSize: const Size(double.infinity, 56),
