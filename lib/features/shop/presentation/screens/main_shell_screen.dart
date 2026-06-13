@@ -52,7 +52,9 @@ class _MainShellScreenState extends State<MainShellScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF4F7F4),
       drawer: Drawer(
-        width: 240,
+        width: 270,
+        elevation: 16,
+        shadowColor: AppColors.primary.withValues(alpha: 0.5),
         backgroundColor: AppColors.surface,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
