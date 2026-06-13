@@ -53,8 +53,8 @@ class _MainShellScreenState extends State<MainShellScreen> {
       backgroundColor: const Color(0xFFF4F7F4),
       drawer: Drawer(
         backgroundColor: AppColors.surface,
-        child: ListView(
-          padding: EdgeInsets.zero,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Container(
               padding: const EdgeInsets.fromLTRB(16, 48, 16, 24),
@@ -75,47 +75,60 @@ class _MainShellScreenState extends State<MainShellScreen> {
                 ],
               ),
             ),
-            ListTile(
-              leading: Icon(Icons.local_florist, color: _currentIndex == 0 ? AppColors.primary : AppColors.outline),
-              title: Text(t.t('home_tab'), style: TextStyle(fontWeight: FontWeight.bold, color: _currentIndex == 0 ? AppColors.primary : AppColors.onSurface)),
-              onTap: () {
-                Navigator.pop(context);
-                setState(() => _currentIndex = 0);
-              },
+            Expanded(
+              child: ListView(
+                padding: EdgeInsets.zero,
+                children: [
+                  ListTile(
+                    leading: Icon(Icons.local_florist, color: _currentIndex == 0 ? AppColors.primary : AppColors.outline),
+                    title: Text(t.t('home_tab'), style: TextStyle(fontWeight: FontWeight.bold, color: _currentIndex == 0 ? AppColors.primary : AppColors.onSurface)),
+                    onTap: () {
+                      Navigator.pop(context);
+                      setState(() => _currentIndex = 0);
+                    },
+                  ),
+                  ListTile(
+                    leading: Icon(Icons.center_focus_strong, color: _currentIndex == 1 ? AppColors.primary : AppColors.outline),
+                    title: Text(t.t('scan_tab'), style: TextStyle(fontWeight: FontWeight.bold, color: _currentIndex == 1 ? AppColors.primary : AppColors.onSurface)),
+                    onTap: () {
+                      Navigator.pop(context);
+                      setState(() => _currentIndex = 1);
+                    },
+                  ),
+                  ListTile(
+                    leading: Icon(Icons.shopping_bag_rounded, color: _currentIndex == 2 ? AppColors.primary : AppColors.outline),
+                    title: Text(t.t('cart_tab'), style: TextStyle(fontWeight: FontWeight.bold, color: _currentIndex == 2 ? AppColors.primary : AppColors.onSurface)),
+                    onTap: () {
+                      Navigator.pop(context);
+                      setState(() => _currentIndex = 2);
+                    },
+                  ),
+                  ListTile(
+                    leading: Icon(Icons.settings_rounded, color: _currentIndex == 4 ? AppColors.primary : AppColors.outline),
+                    title: Text(t.t('settings_tab'), style: TextStyle(fontWeight: FontWeight.bold, color: _currentIndex == 4 ? AppColors.primary : AppColors.onSurface)),
+                    onTap: () {
+                      Navigator.pop(context);
+                      setState(() => _currentIndex = 4);
+                    },
+                  ),
+                ],
+              ),
             ),
-            ListTile(
-              leading: Icon(Icons.center_focus_strong, color: _currentIndex == 1 ? AppColors.primary : AppColors.outline),
-              title: Text(t.t('scan_tab'), style: TextStyle(fontWeight: FontWeight.bold, color: _currentIndex == 1 ? AppColors.primary : AppColors.onSurface)),
-              onTap: () {
-                Navigator.pop(context);
-                setState(() => _currentIndex = 1);
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.shopping_bag_rounded, color: _currentIndex == 2 ? AppColors.primary : AppColors.outline),
-              title: Text(t.t('cart_tab'), style: TextStyle(fontWeight: FontWeight.bold, color: _currentIndex == 2 ? AppColors.primary : AppColors.onSurface)),
-              onTap: () {
-                Navigator.pop(context);
-                setState(() => _currentIndex = 2);
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.settings_rounded, color: _currentIndex == 4 ? AppColors.primary : AppColors.outline),
-              title: Text(t.t('settings_tab'), style: TextStyle(fontWeight: FontWeight.bold, color: _currentIndex == 4 ? AppColors.primary : AppColors.onSurface)),
-              onTap: () {
-                Navigator.pop(context);
-                setState(() => _currentIndex = 4);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.help_outline, color: AppColors.outline),
-              title: Text(t.t('settings_help_support'), style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.onSurface)),
-              onTap: () {
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(t.t('settings_help_coming_soon'))),
-                );
-              },
+            SafeArea(
+              top: false,
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 8.0),
+                child: ListTile(
+                  leading: const Icon(Icons.help_outline, color: AppColors.outline),
+                  title: Text(t.t('settings_help_support'), style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.onSurface)),
+                  onTap: () {
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(t.t('settings_help_coming_soon'))),
+                    );
+                  },
+                ),
+              ),
             ),
           ],
         ),
