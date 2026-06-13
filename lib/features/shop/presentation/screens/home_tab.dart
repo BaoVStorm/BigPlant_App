@@ -9,6 +9,7 @@ import '../../../auth/data/storage_service.dart';
 import '../../../scan/presentation/screens/camera_realtime_scan_screen.dart';
 import '../../domain/models/shop_product.dart';
 import '../../domain/shop_service.dart';
+import 'edit_user_screen.dart';
 import 'product_detail_screen.dart';
 
 class HomeTab extends StatefulWidget {
@@ -55,6 +56,34 @@ class _HomeTabState extends State<HomeTab> {
     final fullName = (await StorageService.getFullName())?.trim() ?? '';
     if (!mounted) return;
     setState(() => _fullName = fullName);
+  }
+
+  Future<void> _openEditProfile() async {
+    final userName = (await StorageService.getUserName())?.trim() ?? '';
+    final fullName = (await StorageService.getFullName())?.trim() ?? '';
+    final email = (await StorageService.getEmail())?.trim() ?? '';
+    final phoneNumber = (await StorageService.getPhoneNumber())?.trim() ?? '';
+    final dateOfBirth = (await StorageService.getDateOfBirth())?.trim() ?? '';
+    final gender = (await StorageService.getGender())?.trim() ?? '';
+    
+    if (!mounted) return;
+    
+    final updated = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(
+        builder: (_) => EditUserScreen(
+          userName: userName,
+          fullName: fullName,
+          email: email,
+          phoneNumber: phoneNumber,
+          dateOfBirth: dateOfBirth,
+          gender: gender,
+        ),
+      ),
+    );
+    
+    if (updated == true) {
+      _loadProfile();
+    }
   }
 
   void _showMessage(String message) {
@@ -211,8 +240,7 @@ class _HomeTabState extends State<HomeTab> {
                   ),
                 ),
                 IconButton(
-                  onPressed: () =>
-                      _showMessage(t.t('home_account_coming_soon')),
+                  onPressed: _openEditProfile,
                   icon: const Icon(
                     Icons.account_circle_outlined,
                     color: AppColors.primary,
