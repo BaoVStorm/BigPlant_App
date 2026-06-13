@@ -46,6 +46,7 @@ class _SettingsTabState extends State<SettingsTab> {
     final gender = (await StorageService.getGender())?.trim() ?? 'unknown';
     final notifyDeals = await StorageService.getNotifyDeals();
     final notifyPlantTips = await StorageService.getNotifyPlantTips();
+    final photoUrl = await StorageService.getPhotoUrl();
 
     if (!mounted) return;
     setState(() {
@@ -59,6 +60,7 @@ class _SettingsTabState extends State<SettingsTab> {
       _gender = gender.isEmpty ? 'unknown' : gender;
       _notifyDeals = notifyDeals;
       _plantCareTips = notifyPlantTips;
+      _photoUrl = photoUrl;
     });
   }
 
