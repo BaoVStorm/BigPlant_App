@@ -242,7 +242,7 @@ class _HomeTabState extends State<HomeTab> {
             Row(
               children: [
                 IconButton(
-                  onPressed: () => _showMessage(t.t('home_menu_coming_soon')),
+                  onPressed: () => Scaffold.of(context).openDrawer(),
                   icon: const Icon(Icons.menu, color: AppColors.primary),
                 ),
                 Expanded(

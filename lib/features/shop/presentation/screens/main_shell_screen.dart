@@ -50,6 +50,77 @@ class _MainShellScreenState extends State<MainShellScreen> {
 
     return Scaffold(
       backgroundColor: const Color(0xFFF4F7F4),
+      drawer: Drawer(
+        backgroundColor: AppColors.surface,
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            DrawerHeader(
+              decoration: const BoxDecoration(
+                color: AppColors.primary,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  const Icon(Icons.eco, size: 48, color: AppColors.white),
+                  const SizedBox(height: 16),
+                  Text(
+                    t.t('home_brand_title'),
+                    style: const TextStyle(
+                      color: AppColors.white,
+                      fontSize: 24,
+                      fontStyle: FontStyle.italic,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.home_outlined, color: AppColors.primary),
+              title: Text(t.t('home_tab')),
+              selected: _currentIndex == 0,
+              selectedTileColor: AppColors.primary.withValues(alpha: 0.1),
+              onTap: () {
+                Navigator.pop(context);
+                setState(() => _currentIndex = 0);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.shopping_bag_outlined, color: AppColors.primary),
+              title: Text(t.t('cart_tab')),
+              selected: _currentIndex == 2,
+              selectedTileColor: AppColors.primary.withValues(alpha: 0.1),
+              onTap: () {
+                Navigator.pop(context);
+                setState(() => _currentIndex = 2);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.settings_outlined, color: AppColors.primary),
+              title: Text(t.t('settings_tab')),
+              selected: _currentIndex == 4,
+              selectedTileColor: AppColors.primary.withValues(alpha: 0.1),
+              onTap: () {
+                Navigator.pop(context);
+                setState(() => _currentIndex = 4);
+              },
+            ),
+            const Divider(),
+            ListTile(
+              leading: const Icon(Icons.help_outline, color: AppColors.primary),
+              title: Text(t.t('settings_help_support')),
+              onTap: () {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(t.t('settings_help_coming_soon'))),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
       body: IndexedStack(index: _currentIndex, children: tabs),
       bottomNavigationBar: SafeArea(
         top: false,
